@@ -164,6 +164,22 @@ platform_tests/api/test_component.py::TestComponentApi::test_get_name:
       - "'dualtor' in topo_name"
       - https://github.com/sonic-net/sonic-mgmt/issues/6664
 
+platform_tests/api/test_psu.py::TestPsuApi::test_get_revision:
+  xfail:
+    reason: "test issue or image issue, to be RCA'ed"
+    conditions:
+      - "release in ['202205']"
+      - "platform in ['x86_64-cel_seastone-r0', 'x86_64-nokia_ixr7250e_36x400g-r0']"
+      - https://github.com/sonic-net/sonic-mgmt/issues/6767
+
+platform_tests/api/test_psu.py::TestPsuApi::test_led:
+  xfail:
+    reason: "test issue or image issue, to be RCA'ed"
+    conditions:
+      - "release in ['202205']"
+      - "platform in ['x86_64-cel_seastone-r0', 'x86_64-nokia_ixr7250e_36x400g-r0']"
+      - https://github.com/sonic-net/sonic-mgmt/issues/6767
+
 platform_tests/api/test_thermal.py::TestThermalApi::test_set_high_threshold:
   xfail:
     reason: "test issue or image issue, to be RCA'ed"
