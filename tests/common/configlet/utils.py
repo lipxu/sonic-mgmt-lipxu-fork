@@ -225,6 +225,28 @@ def chk_for_pfc_wd(duthost):
     return ret
 
 
+def dut_dump(redis_cmd, duthost, data_dir, fname):
+    db_read = {}
+
+    dump_file = "/tmp/{}.json".format(fname)
+
+    log_info("### cmd: {} -o {}".format(redis_cmd, dump_file))
+
+    ret = duthost.shell("{} -o {}".format(redis_cmd, dump_file))
+    assert ret["rc"] == 0, "Failed to run cmd:{}".format(redis_cmd)
+
+    ret = duthost.fetch(src=dump_file, dest=data_dir)
+    dest_file = ret.get("dest", None)
+
+    assert dest_file is not None, "Failed to fetch src={} dest:{}".format(dump_file, data_dir)
+    assert os.path.exists(dest_file), "Fetched file not exist: {}".format(dest_file)
+
+    with open(dest_file, "r") as s:
+        db_read = json.load(s)
+    return db_read
+
+
+
 def get_dump(duthost, db_name, db_info, dir_name, data_dir):
     db_no = db_info["db_no"]
     lst_keys = db_info["keys_to_compare"]
@@ -263,6 +285,32 @@ def get_dump(duthost, db_name, db_info, dir_name, data_dir):
 
 
 def take_DB_dumps(duthost, dir_name, data_dir):
+    log_info("Taking DB dumps dir= {}".format(dir_name))
+
+    cmd = "docker ps -a"
+    cmd_response = duthost.shell(cmd, module_ignore_errors=True)
+    log_info("cmd {} rsp {}".format(cmd, cmd_response.get('stdout', None)))
+
+    cmd = "sudo systemctl status bgp.service"
+    cmd_response = duthost.shell(cmd, module_ignore_errors=True)
+    log_info("cmd {} rsp {}".format(cmd, cmd_response.get('stdout', None)))
+
+    cmd = "show ip bgp summary"
+    cmd_response = duthost.shell(cmd, module_ignore_errors=True)
+    log_info("cmd {} rsp {}".format(cmd, cmd_response.get('stdout', None)))
+
+    cmd = "show ip interfaces"
+    cmd_response = duthost.shell(cmd, module_ignore_errors=True)
+    log_info("cmd {} rsp {}".format(cmd, cmd_response.get('stdout', None)))
+
+    cmd = "show ip bgp neighbors 10.0.0.13"
+    cmd_response = duthost.shell(cmd, module_ignore_errors=True)
+    log_info("cmd {} rsp {}".format(cmd, cmd_response.get('stdout', None)))
+
+    cmd = "show ip bgp neighbors 10.0.0.17"
+    cmd_response = duthost.shell(cmd, module_ignore_errors=True)
+    log_info("cmd {} rsp {}".format(cmd, cmd_response.get('stdout', None)))
+
     log_info("Taking DB dumps dir= {}".format(dir_name))
     for db_name, db_info in scan_dbs.items():
         get_dump(duthost, db_name, db_info, dir_name, data_dir)
