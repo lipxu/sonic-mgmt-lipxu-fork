@@ -2,6 +2,7 @@
 
 import json
 import os
+import time
 
 from tests.configlet.util import strip
 from tests.configlet.util import generic_patch
@@ -129,7 +130,7 @@ def restore_orig_minigraph(duthost, skip_load=False):
         log_info("No minigraph file to restore from")
         return False
 
-
+DEBUG_DELAY_TIME=3600
 def load_minigraph(duthost):
     log_info("##### Loading minigraph")
 
@@ -178,6 +179,12 @@ def load_minigraph(duthost):
         "All critical services should fully started!"
     assert wait_until(300, 20, 30, chk_for_pfc_wd, duthost), \
         "PFC_WD is missing in CONFIG-DB"
+
+
+    end_time = time.time()
+    while time.time() < end_time + DEBUG_DELAY_TIME:
+        log_info("##### debug, delay, current delay {} ".format(time.time() - end_time))
+        time.sleep(120)
 
     log_info("##### After Loading minigraph")
     cmd = "docker ps -a"
