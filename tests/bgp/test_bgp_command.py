@@ -211,3 +211,12 @@ def test_bgp_commands_with_like_bgp_container(
     )
     if verify_cleanup["rc"] == 0 and like_bgp_container_name in verify_cleanup["stdout"]:
         duthost.shell("docker rm -f {}".format(like_bgp_container_name), module_ignore_errors=True)
+
+
+def test_get_FRR_config(duthosts, enum_rand_one_per_hwsku_frontend_hostname):
+    duthost = duthosts[enum_rand_one_per_hwsku_frontend_hostname]
+    logger.info("FRR configuration on {}:".format(duthost.hostname))
+
+    cmd = "vtysh -c 'show running-config'"
+    cmd_response = duthost.shell(cmd, module_ignore_errors=True)
+    logger.info("FRR configuration on {}: \n{}".format(cmd, cmd_response.get('stdout_lines', None)))
