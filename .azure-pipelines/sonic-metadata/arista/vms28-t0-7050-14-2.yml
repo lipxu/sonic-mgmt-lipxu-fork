@@ -10,13 +10,13 @@ resources:
     name: sonic-metadata
     ref: master
 
-#schedules:
-#  - cron: "0 0 * * 0,2,4,6"
-#    displayName: Nightly Scheduler
-#    branches:
-#      include:
-#        - internal
-#    always: true
+schedules:
+  - cron: "0 0 * * 0,2,4,6"
+    displayName: Nightly Scheduler
+    branches:
+      include:
+        - internal-202511
+    always: true
 
 variables:
   - group: SONIC_IMAGE_URLS
@@ -59,13 +59,13 @@ parameters:
 
 - name: FROM_IMAGE_LIST
   type: string
-  default: latest
+  default: 22
   displayName: "All base image numbers (space separated)"
 
 - name: FROM_IMAGE_URL
   displayName: "Base image location"
   type: string
-  default: $(IMAGE_BRCM_ABOOT_202405)
+  default: $(IMAGE_BRCM_ABOOT_202411)
   values:
   - $(IMAGE_BRCM_ABOOT_201811)
   - $(IMAGE_BRCM_ABOOT_201911)
@@ -94,7 +94,7 @@ parameters:
 - name: TO_IMAGE_URL
   displayName: "Target image location"
   type: string
-  default: $(IMAGE_BRCM_ABOOT_202411)
+  default: $(IMAGE_BRCM_ABOOT_202505)
   values:
   - $(IMAGE_BRCM_ABOOT_201811)
   - $(IMAGE_BRCM_ABOOT_201911)
@@ -111,6 +111,8 @@ parameters:
   - $(IMAGE_BRCM_ABOOT_202405_SLIM)
   - $(IMAGE_BRCM_ABOOT_202411)
   - $(IMAGE_BRCM_ABOOT_202411_SLIM)
+  - $(IMAGE_BRCM_ABOOT_202505)
+  - $(IMAGE_BRCM_ABOOT_202505_SLIM)
   - $(IMAGE_BRCM_ABOOT_INTERNAL)
   - $(IMAGE_BRCM_ABOOT_PUBLIC)
   - custom
