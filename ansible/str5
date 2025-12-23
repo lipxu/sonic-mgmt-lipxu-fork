@@ -16,59 +16,53 @@ all:
         ansible_ssh_pass: root
       hosts:
         vms91-1:
-          ansible_host: 10.64.247.143
-          ansible_hostv6: 2a01:111:e210:b000::a40:f78f
-        vms91-2:
-          ansible_host: 10.64.247.150
-          ansible_hostv6: 2a01:111:e210:b000::a40:f796
+          ansible_host: 10.64.247.178
+          ansible_hostv6: 2a01:111:e210:b000::a40:f7b2
         vms91-4:
-          ansible_host: 10.64.247.157
-          ansible_hostv6: 2a01:111:e210:b000::a40:f79d
+          ansible_host: 10.64.247.188
+          ansible_hostv6: 2a01:111:e210:b000::a40:f7bc
         vms91-5:
-          ansible_host: 10.64.247.174
-          ansible_hostv6: 2a01:111:e210:b000::a40:f7ae
+          ansible_host: 10.64.247.182
+          ansible_hostv6: 2a01:111:e210:b000::a40:f7b6
         vms91-6:
-          ansible_host: 10.64.247.176
-          ansible_hostv6: 2a01:111:e210:b000::a40:f7b0
-        vms91-7:
-          ansible_host: 10.64.247.177
-          ansible_hostv6: 2a01:111:e210:b000::a40:f7b1
-        vms92-2:
-          ansible_host: 10.64.247.152
-          ansible_hostv6: 2a01:111:e210:b000::a40:f798
-        vms92-3:
-          ansible_host: 10.64.247.175
-          ansible_hostv6: 2a01:111:e210:b000::a40:f7af
-        vms92-4:
           ansible_host: 10.64.247.156
           ansible_hostv6: 2a01:111:e210:b000::a40:f79c
-        vms93-1:
-          ansible_host: 10.64.246.207
-          ansible_hostv6: 2a01:111:e210:b000::a40:f6cf
+        vms91-7:
+          ansible_host: 10.64.247.157
+          ansible_hostv6: 2a01:111:e210:b000::a40:f79d
+        vms92-2:
+          ansible_host: 10.64.247.187
+          ansible_hostv6: 2a01:111:e210:b000::a40:f7bb
+        vms92-3:
+          ansible_host: 10.64.247.200
+          ansible_hostv6: 2a01:111:e210:b000::a40:f7c8
+        vms92-4:
+          ansible_host: 10.64.247.203
+          ansible_hostv6: 2a01:111:e210:b000::a40:f7cb
         vms93-2:
-          ansible_host: 10.64.247.139
-          ansible_hostv6: 2a01:111:e210:b000::a40:f78b
+          ansible_host: 10.64.247.190
+          ansible_hostv6: 2a01:111:e210:b000::a40:f7be
         vms93-3:
           ansible_host: 10.64.247.168
           ansible_hostv6: 2a01:111:e210:b000::a40:f7a8
         vms93-5:
-          ansible_host: 10.64.247.141
-          ansible_hostv6: 2a01:111:e210:b000::a40:f78d
-        vms94-1-a:
-          ansible_host: 10.64.247.148
-          ansible_hostv6: 2a01:111:e210:b000::a40:f794
-        vms94-1-b:
-          ansible_host: 10.64.247.153
-          ansible_hostv6: 2a01:111:e210:b000::a40:f799
-        vms94-2-a:
-          ansible_host: 10.64.247.149
-          ansible_hostv6: 2a01:111:e210:b000::a40:f795
-        vms94-2-b:
-          ansible_host: 10.64.247.167
-          ansible_hostv6: 2a01:111:e210:b000::a40:f7a7
-        vms95-1:
           ansible_host: 10.64.247.171
           ansible_hostv6: 2a01:111:e210:b000::a40:f7ab
+        vms94-1-a:
+          ansible_host: 10.64.247.189
+          ansible_hostv6: 2a01:111:e210:b000::a40:f7bd
+        vms94-1-b:
+          ansible_host: 10.64.247.173
+          ansible_hostv6: 2a01:111:e210:b000::a40:f7ad
+        vms94-2-a:
+          ansible_host: 10.64.247.174
+          ansible_hostv6: 2a01:111:e210:b000::a40:f7ae
+        vms94-2-b:
+          ansible_host: 10.64.247.175
+          ansible_hostv6: 2a01:111:e210:b000::a40:f7af
+        vms95-1:
+          ansible_host: 10.64.247.176
+          ansible_hostv6: 2a01:111:e210:b000::a40:f7b0
 
     pdu:
       hosts:
@@ -196,6 +190,7 @@ fanout:
       ansible_host: 10.64.247.25
       ansible_hostv6: 2a01:111:e210:b000::a40:f719
       os: sonic
+      mgmt_subnet_mask_length: 26
     str5-7060x6-512-fan-3:
       ansible_host: 10.64.247.132
       ansible_hostv6: 2a01:111:e210:b000::a40:f784
@@ -236,10 +231,6 @@ fanout:
       ansible_host: 10.64.247.165
       ansible_hostv6: 2a01:111:e210:b000::a40:f7a5
       os: sonic
-    str5-sn5640-fan-4:
-      ansible_host: 10.64.246.169
-      ansible_hostv6: 2a01:111:e210:b000::a40:f6a9
-      os: sonic
     str5-sn5640-fan-5:
       ansible_host: 10.64.247.170
       ansible_hostv6: 2a01:111:e210:b000::a40:f7aa
@@ -248,29 +239,29 @@ fanout:
       ansible_host: 10.64.246.32
       ansible_hostv6: 2a01:111:e210:b000::a40:f620
       os: sonic
-    str5-7060x6-512-fan-7:
-      ansible_host: 10.64.246.206
-      ansible_hostv6: 2a01:111:e210:b000::a40:f6ce
-      os: sonic
     str5-7260cx3-acs-fan-20:
-      ansible_host: 10.3.155.81
-      ansible_hostv6: 2a01:111:e210:8a::a03:9b51
+      ansible_host: 10.64.247.109
+      ansible_hostv6: 2a01:111:e210:b000::a40:f76d
+      mgmt_subnet_mask_length: 26
     str5-7260cx3-acs-fan-21:
-      ansible_host: 10.3.155.82
-      ansible_hostv6: 2a01:111:e210:8a::a03:9b52
+      ansible_host: 10.64.247.110
+      ansible_hostv6: 2a01:111:e210:b000::a40:f76e
+      mgmt_subnet_mask_length: 26
     str5-z9332f-01:
-      ansible_host: 10.3.155.83
-      ansible_hostv6: 2a01:111:e210:8a::a03:9b53
+      ansible_host: 10.64.247.112
+      ansible_hostv6: 2a01:111:e210:b000::a40:f770
       os: sonic
+      mgmt_subnet_mask_length: 26
     str5-z9332f-02:
-      ansible_host: 10.3.155.84
-      ansible_hostv6: 2a01:111:e210:8a::a03:9b54
+      ansible_host: 10.64.247.115
+      ansible_hostv6: 2a01:111:e210:b000::a40:f773
       os: sonic
+      mgmt_subnet_mask_length: 26
 
 
 sonic:
   vars:
-    mgmt_subnet_mask_length: 23
+    mgmt_subnet_mask_length: 25
     mgmt_subnet_v6_mask_length: 64
   children:
     sonic_arista_7060x6_512:
@@ -282,7 +273,7 @@ sonic_arista_7060x6_512:
     str5-7060x6-512-3:
       ansible_host: 10.64.247.131
       ansible_hostv6: 2a01:111:e210:b000::a40:f783
-      mgmt_subnet_mask_length: 23
+      mgmt_subnet_mask_length: 25
       hwsku: Arista-7060X6-64PE-B-C512S2
       model: DCS-7060X6-64PE-B
       serial: HBG250905MG
@@ -302,7 +293,7 @@ sonic_arista_7060x6_512:
     str5-7060x6-512-4:
       ansible_host: 10.64.247.133
       ansible_hostv6: 2a01:111:e210:b000::a40:f785
-      mgmt_subnet_mask_length: 23
+      mgmt_subnet_mask_length: 25
       hwsku: Arista-7060X6-64PE-B-O128
       model: DCS-7060X6-64PE-B
       serial: HBG250905ME
@@ -322,7 +313,7 @@ sonic_arista_7060x6_512:
     str5-7060x6-512-5:
       ansible_host: 10.64.247.135
       ansible_hostv6: 2a01:111:e210:b000::a40:f787
-      mgmt_subnet_mask_length: 23
+      mgmt_subnet_mask_length: 25
       hwsku: Arista-7060X6-64PE-B-C512S2
       model: DCS-7060X6-64PE-B
       serial: HBG250905MW
@@ -342,7 +333,7 @@ sonic_arista_7060x6_512:
     str5-7060x6-512-6:
       ansible_host: 10.64.247.146
       ansible_hostv6: 2a01:111:e210:b000::a40:f792
-      mgmt_subnet_mask_length: 23
+      mgmt_subnet_mask_length: 25
       hwsku: Arista-7060X6-64PE-B-O128
       model: DCS-7060X6-64PE-B
       serial: HBG25160FH8
@@ -359,30 +350,10 @@ sonic_arista_7060x6_512:
         "0x2B": "Arista Networks"
         "0x2D": "Arista Networks"
         "0x2F": "HBG25160FH8"
-    str5-7060x6-512-7:
-      ansible_host: 10.64.246.205
-      ansible_hostv6: 2a01:111:e210:b000::a40:f6cd
-      mgmt_subnet_mask_length: 23
-      hwsku: Arista-7060X6-64PE-B-C448O16
-      model: DCS-7060X6-64PE-B
-      serial: HBG25160FHW
-      base_mac: d8:06:f3:3b:ff:f7
-      syseeprom_info:
-        "0x21": "DCS-7060X6-64PE-B"
-        "0x22": "ASY0899401A0"
-        "0x23": "HBG25160FHW"
-        "0x24": "d8:06:f3:3b:ff:f7"
-        "0x25": "2025/03/08 09:42:12"
-        "0x26": "01"
-        "0x27": "02.00"
-        "0x28": "x86_64-arista_7060x6_64pe_b"
-        "0x2B": "Arista Networks"
-        "0x2D": "Arista Networks"
-        "0x2F": "HBG25160FHW"
     str5-7060x6-512-8:
       ansible_host: 10.64.247.172
       ansible_hostv6: 2a01:111:e210:b000::a40:f7ac
-      mgmt_subnet_mask_length: 23
+      mgmt_subnet_mask_length: 25
       hwsku: Arista-7060X6-64PE-B-C512S2
       model: DCS-7060X6-64PE-B
       serial: HBG250905MG
@@ -402,7 +373,7 @@ sonic_arista_7060x6_512:
     str5-7060x6-moby-512-1:
       ansible_host: 10.64.247.154
       ansible_hostv6: 2a01:111:e210:b000::a40:f79a
-      mgmt_subnet_mask_length: 23
+      mgmt_subnet_mask_length: 25
       hwsku: Arista-7060X6-16PE-384C-B-O128S2
       model: DCS-7060X6-16PE-384C-B
       serial: SSN25202317
@@ -422,7 +393,7 @@ sonic_arista_7060x6_512:
     str5-7060x6-moby-512-2:
       ansible_host: 10.64.247.158
       ansible_hostv6: 2a01:111:e210:b000::a40:f79e
-      mgmt_subnet_mask_length: 23
+      mgmt_subnet_mask_length: 25
       hwsku: Arista-7060X6-16PE-384C-B-O128S2
       model: DCS-7060X6-16PE-384C-B
       serial: SSN25202343
@@ -442,7 +413,7 @@ sonic_arista_7060x6_512:
     str5-7060x6-moby-512-3:
       ansible_host: 10.64.247.162
       ansible_hostv6: 2a01:111:e210:b000::a40:f7a2
-      mgmt_subnet_mask_length: 23
+      mgmt_subnet_mask_length: 25
       hwsku: Arista-7060X6-16PE-384C-B-O128S2
       model: DCS-7060X6-16PE-384C-B
       serial: SSN25202376
@@ -462,7 +433,7 @@ sonic_arista_7060x6_512:
     str5-7060x6-moby-512-4:
       ansible_host: 10.64.247.201
       ansible_hostv6: 2a01:111:e210:b000::a40:f7c9
-      mgmt_subnet_mask_length: 23
+      mgmt_subnet_mask_length: 25
       hwsku: Arista-7060X6-16PE-384C-B-O128S2
       model: DCS-7060X6-16PE-384C-B
       serial: SSN25202314
@@ -482,7 +453,7 @@ sonic_arista_7060x6_512:
     str5-7060x6-moby-512-5:
       ansible_host: 10.64.247.202
       ansible_hostv6: 2a01:111:e210:b000::a40:f7ca
-      mgmt_subnet_mask_length: 23
+      mgmt_subnet_mask_length: 25
       hwsku: Arista-7060X6-16PE-384C-B-O128S2
       model: DCS-7060X6-16PE-384C-B
       serial: SSN25202318
@@ -512,6 +483,9 @@ sonic_arista_7280dr3_400G:
     mgmt_subnet_mask_length: 26
   hosts:
     str5-7280dr3-2:
+      ansible_host: 10.64.247.74
+      ansible_hostv6: 2a01:111:e210:b000::a40:f74a
+      mgmt_subnet_mask_length: 26
       hwsku: Arista-7280DR3AM-36
       sonic_hwsku: Arista-7280DR3AM-36
       sonic_hw_platform: x86_64-arista_7280dr3am_36
@@ -522,8 +496,6 @@ sonic_arista_7280dr3_400G:
       loopback4096_ipv6: [2603:10e2:400::1/128,2603:10e2:400::2/128]
       serial: FGN235007EM
       base_mac:  a4:3f:68:11:c5:86
-      ansible_host: 10.3.155.69
-      ansible_hostv6: 2a01:111:e210:8a::a03:9b45
       model: 'DCS-7280DR3AM-36'
       syseeprom_info:
         "0x21": "DCS-7280DR3AM-36"
@@ -538,6 +510,9 @@ sonic_arista_7280dr3_400G:
         "0x2E": "Aboot-norcal10-10.0.6-udimm-36482749"
         "0x2F": "FGN235007EM"
     str5-7280dr3-3:
+      ansible_host: 10.64.247.78
+      ansible_hostv6: 2a01:111:e210:b000::a40:f74e
+      mgmt_subnet_mask_length: 26
       hwsku: Arista-7280DR3AM-36
       sonic_hwsku: Arista-7280DR3AM-36
       sonic_hw_platform: x86_64-arista_7280dr3am_36
@@ -548,8 +523,6 @@ sonic_arista_7280dr3_400G:
       loopback4096_ipv6: [2603:10e2:400::1/128,2603:10e2:400::2/128]
       serial: FGN2340026T
       base_mac: 38:38:a6:a4:53:04
-      ansible_host: 10.3.155.70
-      ansible_hostv6: 2a01:111:e210:8a::a03:9b46
       model: 'DCS-7280DR3AM-36'
       syseeprom_info:
         "0x21": "DCS-7280DR3AM-36"
@@ -569,7 +542,7 @@ sonic_nvidia_sn5640:
     str5-sn5640-1:
       ansible_host: 10.64.247.137
       ansible_hostv6: 2a01:111:e210:b000::a40:f789
-      mgmt_subnet_mask_length: 23
+      mgmt_subnet_mask_length: 25
       hwsku: Mellanox-SN5640-C512S2
       model: MSN5640
       serial: MT25116051TG
@@ -589,7 +562,7 @@ sonic_nvidia_sn5640:
     str5-sn5640-2:
       ansible_host: 10.64.246.74
       ansible_hostv6: 2a01:111:e210:b000::a40:f64a
-      mgmt_subnet_mask_length: 23
+      mgmt_subnet_mask_length: 25
       hwsku: Mellanox-SN5640-C512S2
       model: MSN5640
       serial: MT25116051T3
@@ -610,7 +583,7 @@ sonic_nvidia_sn5640:
     str5-sn5640-3:
       ansible_host: 10.64.247.164
       ansible_hostv6: 2a01:111:e210:b000::a40:f7a4
-      mgmt_subnet_mask_length: 23
+      mgmt_subnet_mask_length: 25
       hwsku: Mellanox-SN5640-C512S2
       model: MSN5640
       serial:
@@ -628,30 +601,10 @@ sonic_nvidia_sn5640:
         "0x2B": "Nvidia"
         "0x2D": "Nvidia"
         "0xFE": "0xC8BAF94C"
-    str5-sn5640-4:
-      ansible_host: 10.64.246.35
-      ansible_hostv6: 2a01:111:e210:b000::a40:f623
-      mgmt_subnet_mask_length: 23
-      hwsku: Mellanox-SN5640-C448O16
-      model: MSN5640
-      serial: MT2516600J7A
-      base_mac: 50:00:E6:01:D8:0C
-      syseeprom_info:
-        "0x21": "SN5640"
-        "0x22": "920-9N52F-09RB-7S0"
-        "0x23": "MT2516600J7A"
-        "0x24": "50:00:E6:01:D8:0C"
-        "0x25": "03/18/2025 17:10:24"
-        "0x26": "16"
-        "0x27": "02.00"
-        "0x28": "x86_64-nvidia_sn5640-r0"
-        "0x2B": "Nvidia"
-        "0x2D": "Nvidia"
-        "0x2F": "MT2516600J7A"
     str5-sn5640-5:
       ansible_host: 10.64.247.169
       ansible_hostv6: 2a01:111:e210:b000::a40:f7a9
-      mgmt_subnet_mask_length: 23
+      mgmt_subnet_mask_length: 25
       hwsku: Mellanox-SN5640-C448O16
       model: MSN5640
       serial:
@@ -671,7 +624,7 @@ sonic_nvidia_sn5640:
     str5-sn5640-6:
       ansible_host: 10.64.246.33
       ansible_hostv6: 2a01:111:e210:b000::a40:f621
-      mgmt_subnet_mask_length: 23
+      mgmt_subnet_mask_length: 25
       hwsku: Mellanox-SN5640-C512S2
       model: MSN5640
       serial: MT2516600JFW
@@ -709,9 +662,6 @@ server:
     str5-acs-serv-96:
       ansible_host: 10.64.247.196
       ansible_hostv6: 2a01:111:e210:b000::a40:f7c4
-    str5-acs-serv-97:
-      ansible_host: 10.64.247.197
-      ansible_hostv6: 2a01:111:e210:b000::a40:f7c5
     str5-acs-serv-98:
       ansible_host: 10.64.247.198
       ansible_hostv6: 2a01:111:e210:b000::a40:f7c6
