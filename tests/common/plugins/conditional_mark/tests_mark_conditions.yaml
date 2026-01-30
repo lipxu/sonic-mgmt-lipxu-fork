@@ -5065,7 +5065,7 @@ test_pktgen.py:
 #######################################
 test_pretest.py::test_disable_rsyslog_rate_limit:
   skip:
-    reason: "Skip test for KVM dualtor memory leak with syslog rate-limit-feature enable"
+    reason: "We don't need to disable the rate limit on vs testbed"
     conditions:
       - "asic_type in ['vs']"
       - https://github.com/sonic-net/sonic-mgmt/issues/15843
