@@ -4333,6 +4333,15 @@ restapi/test_restapi.py::test_data_path_sad:
     conditions:
       - "https://github.com/sonic-net/sonic-mgmt/issues/17997 and 'SN5' in hwsku"
 
+restapi/test_restapi_client_cert_auth.py:
+  skip:
+    reason: "Not supported on 7050 (except 7050CX3), S6000, and SN2700 SKUs."
+    conditions_logical_operator: or
+    conditions:
+      - "'7050' in hwsku and '7050CX3' not in hwsku"
+      - "'S6000' in hwsku"
+      - "'SN2700' in hwsku"
+
 restapi/test_restapi_vxlan_ecmp.py:
   skip:
     reason: "Only supported on cisco 8102, 8101 and mlnx 4600C T1"
@@ -4574,6 +4583,14 @@ snappi_tests/dataplane:
     reason: "Skipping dash on 2025 releases"
     conditions:
       - "'2025' in release"
+
+snappi_tests/ecn/test_bp_fabric_ecn_marking_with_snappi.py:
+  skip:
+    reason: "This test is written only for T2-cisco-8000."
+    conditions_logical_operator: or
+    conditions:
+      - "asic_type not in ['cisco-8000']"
+      - "'t2' not in topo_name"
 
 snappi_tests/ecn/test_ecn_marking_with_pfc_quanta_variance_with_snappi.py:
   skip:
