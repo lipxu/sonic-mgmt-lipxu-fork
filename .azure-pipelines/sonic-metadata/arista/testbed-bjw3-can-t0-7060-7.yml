@@ -59,13 +59,13 @@ parameters:
 
 - name: FROM_IMAGE_LIST
   type: string
-  default: 30
+  default: 22
   displayName: "All base image numbers (space separated)"
 
 - name: FROM_IMAGE_URL
   displayName: "Base image location"
   type: string
-  default: $(BJW_IMAGE_BRCM_ABOOT_202505)
+  default: $(BJW_IMAGE_BRCM_ABOOT_202411_SLIM)
   values:
   - $(BJW_IMAGE_BRCM_ABOOT_201811)
   - $(BJW_IMAGE_BRCM_ABOOT_201911)
@@ -95,7 +95,7 @@ parameters:
 - name: TO_IMAGE_URL
   displayName: "Target image location"
   type: string
-  default: $(BJW_IMAGE_BRCM_ABOOT_202511)
+  default: $(BJW_IMAGE_BRCM_ABOOT_202505)
   values:
   - $(BJW_IMAGE_BRCM_ABOOT_201811)
   - $(BJW_IMAGE_BRCM_ABOOT_201911)
@@ -114,7 +114,6 @@ parameters:
   - $(BJW_IMAGE_BRCM_ABOOT_202411_SLIM)
   - $(BJW_IMAGE_BRCM_ABOOT_202505)
   - $(BJW_IMAGE_BRCM_ABOOT_202505_SLIM)
-  - $(BJW_IMAGE_BRCM_ABOOT_202511)
   - $(BJW_IMAGE_BRCM_ABOOT_INTERNAL)
   - $(BJW_IMAGE_BRCM_ABOOT_PUBLIC)
   - custom
@@ -167,3 +166,4 @@ stages:
       RUN_REBOOT_CASE: ${{ parameters.RUN_REBOOT_CASE }}
       SELECT_SAD_CASES: ${{ parameters.SELECT_SAD_CASES }}
       ITERATIONS : ${{ parameters.ITERATIONS }}
+
