@@ -63,7 +63,7 @@ parameters:
 - name: FROM_IMAGE_URL
   displayName: "Base image location"
   type: string
-  default: $(IMAGE_MLNX_INTERNAL)
+  default: $(IMAGE_MLNX_202505)
   values:
   - $(IMAGE_MLNX_201811)
   - $(IMAGE_MLNX_201911)
@@ -73,6 +73,7 @@ parameters:
   - $(IMAGE_MLNX_202311)
   - $(IMAGE_MLNX_202405)
   - $(IMAGE_MLNX_202411)
+  - $(IMAGE_MLNX_202505)
   - $(IMAGE_MLNX_INTERNAL)
   - $(IMAGE_MLNX_PUBLIC)
   - custom
@@ -85,7 +86,7 @@ parameters:
 - name: TO_IMAGE_URL
   displayName: "Target image location"
   type: string
-  default: $(IMAGE_MLNX_202505)
+  default: $(IMAGE_MLNX_202511)
   values:
   - $(IMAGE_MLNX_201811)
   - $(IMAGE_MLNX_201911)
@@ -96,6 +97,7 @@ parameters:
   - $(IMAGE_MLNX_202405)
   - $(IMAGE_MLNX_202411)
   - $(IMAGE_MLNX_202505)
+  - $(IMAGE_MLNX_202511)
   - $(IMAGE_MLNX_INTERNAL)
   - $(IMAGE_MLNX_PUBLIC)
   - custom
