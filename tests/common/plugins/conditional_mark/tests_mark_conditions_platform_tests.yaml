@@ -1083,6 +1083,7 @@ platform_tests/mellanox/test_check_sfp_eeprom.py:
     reason: "202405 and 202411 not support command like 'mlxlink -d /dev/mst/mt53104_pci_cr0 -p 1 -m' on mellanox spc3 devices when software control is enabled"
     conditions_logical_operator: or
     conditions:
+      - "asic_type not in ['mellanox', 'nvidia-bluefield']"
       - "'SN4' in hwsku and (release in ['202405', '202411'])"
       - "'SN5' in hwsku and (release in ['202405', '202411'])"
 
@@ -1153,6 +1154,7 @@ platform_tests/test_advanced_reboot.py:
 platform_tests/test_advanced_reboot.py::test_fast_reboot:
   skip:
     reason: "Skip for smartswitch topology"
+    conditions_logical_operator: or
     conditions:
       - "is_smartswitch==True"
       - "'isolated' in topo_name"
