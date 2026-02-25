@@ -59,11 +59,10 @@ class GenerateGoldenConfigDBModule(object):
                                     num_asics=dict(require=False, type='int', default=1),
                                     hwsku=dict(require=False, type='str', default=None),
                                     vm_configuration=dict(require=False, type='dict', default={}),
-                                    is_light_mode=dict(require=False, type='bool', default=True),
-                                    bgp_confd_asn=dict(require=False, type='str', default=None),
-                                    bgp_confd_peers=dict(require=False, type='str', default=None),
                                     is_lit_mode=dict(require=False, type='bool', default=True),
-                                    supports_check_mode=True))
+                                    bgp_confd_asn=dict(require=False, type='str', default=None),
+                                    bgp_confd_peers=dict(require=False, type='str', default=None)),
+                                    supports_check_mode=True)
         self.topo_name = self.module.params['topo_name']
         self.port_index_map = self.module.params['port_index_map']
         self.macsec_profile = self.module.params['macsec_profile']
@@ -71,10 +70,9 @@ class GenerateGoldenConfigDBModule(object):
         self.hwsku = self.module.params['hwsku']
 
         self.vm_configuration = self.module.params['vm_configuration']
-        self.is_light_mode = self.module.params['is_light_mode']
+        self.is_lit_mode = self.module.params['is_lit_mode']
         self.bgp_confd_asn = self.module.params['bgp_confd_asn']
         self.bgp_confd_peers = self.module.params['bgp_confd_peers']
-        self.is_lit_mode = self.module.params['is_lit_mode']
 
     def generate_mgfx_golden_config_db(self):
         rc, out, err = self.module.run_command("sonic-cfggen -H -m -j /etc/sonic/init_cfg.json --print-data")

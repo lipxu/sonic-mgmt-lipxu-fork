@@ -753,11 +753,10 @@
           port_index_map: "{{ port_index_map | default({}) }}"
           hwsku: "{{ hwsku }}"
           vm_configuration: "{{ configuration if topo == 't1-filterleaf-lag' else omit }}"
-          is_light_mode: "{{ is_light_mode | default(true) }}"
+          is_lit_mode: "{{ is_lit_mode | default(true) }}"
           num_asics: "{{ num_asics }}"
           bgp_confd_asn: "{{ bgp_confd_asn }}"
           bgp_confd_peers: "{{ bgp_confd_peers }}"
-          is_lit_mode: "{{ is_lit_mode | default(true) }}"
         become: true
         when: enable_macsec is not defined
 
