@@ -219,9 +219,9 @@
   group-name: vms20-ixia-10
   topo: tgen-t1-64-4
   ptf_image_name: docker-keysight-api-server
-  ptf_imagetag: 10.25.2405.106
+  ptf_imagetag: 10.80.2412.176
   ptf: ixia-apiserver4
-  ptf_ip: 10.3.145.39/23
+  ptf_ip: 10.64.246.126/25
   ptf_ipv6:
   server: server_20
   vm_base:
@@ -234,14 +234,15 @@
   tgs:
   - msr-ixia-4
   auto_recover: 'False'
-  comment: devojha
+  comment: dashuaizhang
 
 - conf-name: vms20-rdma-t0-7050cx3
   group-name: vms20-ixia-11
   topo: tgen-t0-3-32
   ptf_image_name: docker-keysight-api-server
-  ptf: vms20-ixia-11
-  ptf_ip: 10.64.246.25/25
+  ptf_imagetag: 10.80.2412.176
+  ptf: ixia-apiserver4
+  ptf_ip: 10.64.246.126/25
   ptf_ipv6:
   server: server_20
   vm_base:
@@ -254,7 +255,7 @@
   tgs:
   - msr-ixia-4
   auto_recover: 'False'
-  comment: devojha
+  comment: dashuaizhang
 
 - conf-name: vms20-rdma-t0-5640
   group-name: vms20-ixia-12
@@ -788,7 +789,7 @@
   ptf_image_name: docker-keysight-api-server
   ptf_imagetag: 10.25.2405.106
   ptf: vms69-ixia-2
-  ptf_ip: 10.64.247.111/26
+  ptf_ip: 10.64.247.69/26
   ptf_ipv6:
   server: server_69
   vm_base:
@@ -806,7 +807,7 @@
   ptf_image_name: docker-keysight-api-server
   ptf_imagetag: 10.25.2405.106
   ptf: vms69-ixia-2
-  ptf_ip: 10.64.247.111/26
+  ptf_ip: 10.64.247.69/26
   ptf_ipv6:
   server: server_69
   vm_base:
@@ -2218,6 +2219,36 @@
   inv_name: str3
   auto_recover: 'True'
   comment: patelmi
+
+- conf-name: ptp-7060x6-5
+  group-name: ''
+  topo: ptp-512
+  ptf_image_name: ''
+  ptf: ''
+  ptf_ip: ''
+  ptf_ipv6: ''
+  server: ''
+  vm_base: ''
+  dut:
+  - str43-7060x6-512-c17-u08
+  inv_name: str4
+  auto_recover: 'True'
+  comment: v-ryannikan
+
+- conf-name: ptp-7060x6-6
+  group-name: ''
+  topo: ptp-512
+  ptf_image_name: ''
+  ptf: ''
+  ptf_ip: ''
+  ptf_ipv6: ''
+  server: ''
+  vm_base: ''
+  dut:
+  - str43-7060x6-512-c17-u10
+  inv_name: str4
+  auto_recover: 'True'
+  comment: v-ryannikan
 
 - conf-name: ptp-7060x6-moby-1
   group-name: ''
@@ -4351,9 +4382,24 @@
   auto_recover: 'True'
   comment: arizzubair
 
+- conf-name: ptp-8101-1
+  group-name:
+  topo: ptp-32
+  ptf_image_name: ''
+  ptf: ''
+  ptf_ip: ''
+  ptf_ipv6: ''
+  server: ''
+  vm_base: ''
+  dut:
+  - str-8101-d04-u36
+  inv_name: str
+  auto_recover: 'True'
+  comment: v-ryannikan
+
 - conf-name: ptp-sn4700-1
   group-name:
-  topo: ptp-56
+  topo: ptp-32
   ptf_image_name: ''
   ptf: ''
   ptf_ip: ''
@@ -4377,6 +4423,36 @@
   vm_base: ''
   dut:
   - str-4700-d04-u09
+  inv_name: str
+  auto_recover: 'True'
+  comment: v-ryannikan
+
+- conf-name: ptp-sn4700-3
+  group-name:
+  topo: ptp-56
+  ptf_image_name: ''
+  ptf: ''
+  ptf_ip: ''
+  ptf_ipv6: ''
+  server: ''
+  vm_base: ''
+  dut:
+  - str-4700-d04-u43
+  inv_name: str
+  auto_recover: 'True'
+  comment: v-ryannikan
+
+- conf-name: ptp-sn4700-4
+  group-name:
+  topo: ptp-56
+  ptf_image_name: ''
+  ptf: ''
+  ptf_ip: ''
+  ptf_ipv6: ''
+  server: ''
+  vm_base: ''
+  dut:
+  - str43-msn4700-d05-u23
   inv_name: str
   auto_recover: 'True'
   comment: v-ryannikan
