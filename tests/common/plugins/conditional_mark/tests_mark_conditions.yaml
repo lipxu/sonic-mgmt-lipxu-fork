@@ -407,10 +407,8 @@ bgp/test_bgp_sentinel.py::test_bgp_sentinel[IPv4:
 
 bgp/test_bgp_sentinel.py::test_bgp_sentinel[IPv6:
   xfail:
-    reason: "xfail for IPv6-only topologies, with issue it try to parse with IPv4 style or due to GH issue 23938"
-    conditions_logical_operator: or
+    reason: "xfail for GH issue 23938"
     conditions:
-      - "https://github.com/sonic-net/sonic-mgmt/issues/20193 and '-v6-' in topo_name"
       - "https://github.com/sonic-net/sonic-buildimage/issues/23938"
 
 bgp/test_bgp_session.py::test_bgp_session_interface_down:
@@ -1471,9 +1469,10 @@ ecmp/test_fgnhg.py:
 #######################################
 #####         everflow            #####
 #######################################
-everflow/test_everflow_ipv6.py::TestIngressEverflowIPv6::test_any_protocol[erspan_ipv4-cli-default]:
-  skip:
-    reason: "Skip for IPv6-only topologies"
+everflow/test_everflow_ipv6.py::Test(In|E)gressEverflowIPv6::test_[a-zA-Z0-9_]+\[erspan_ipv4-:
+  regex: true
+  xfail:
+    reason: "Xfail for IPv6-only topologies"
     conditions:
       - "'-v6-' in topo_name"
 
@@ -3613,6 +3612,12 @@ pfcwd/test_pfcwd_warm_reboot.py:
         - "is_smartswitch==True"
         - "asic_type in ['vs'] and https://github.com/sonic-net/sonic-mgmt/issues/20675"
         - "release in ['202412']"
+   xfail:
+     reason: "This case has a known issue. Skipping until the issue is addressed."
+     conditions_logical_operator: or
+     conditions:
+        - "https://github.com/sonic-net/sonic-sairedis/issues/1030 and 't0' in topo_name and asic_type in ['marvell-teralynx']"
+        - "https://github.com/sonic-net/sonic-swss/issues/2231 and 't0' in topo_name and asic_type in ['marvell-teralynx']"
 
 pfcwd/test_pfcwd_warm_reboot.py::TestPfcwdWb::test_pfcwd_wb[IPv4-async_storm:
    skip:
@@ -3728,7 +3733,7 @@ qos/test_ecn_config.py:
   skip:
     reason: "This test only support on cisco device"
     conditions:
-      - "asic_type not in ['cisco-8000']"
+      - "asic_type not in ['cisco-8000', 'broadcom']"
 
 qos/test_oq_watchdog.py:
   skip:
@@ -3860,6 +3865,12 @@ qos/test_qos_sai.py::TestQosSai::testQosSaiDot1pQueueMapping:
       - "'backend' not in topo_name"
       - "topo_type in ['m0', 'mx', 'm1']"
       - "topo_name not in constants['QOS_SAI_TOPO'] and asic_type not in ['mellanox']"
+
+qos/test_qos_sai.py::TestQosSai::testQosSaiDscpEcn:
+  skip:
+    reason: "Unsupported testbed type."
+    conditions:
+      - "asic_type not in ['broadcom'] and asic_subtype not in ['broadcom-dnx']"
 
 qos/test_qos_sai.py::TestQosSai::testQosSaiDscpQueueMapping:
   skip:
@@ -5178,10 +5189,11 @@ vxlan/test_vxlan_crm.py::Test_VxLAN_Crm::test_crm_512_nexthop_groups[v6_in_v6]:
 
 vxlan/test_vxlan_decap.py:
   skip:
-    reason: "vxlan support not available for cisco-8122 platforms. Not required on isolated topologies d256u256s2, d96u32s2, d448u15-lag, and d128, as well as their minimzed and -v6 variants."
+    reason: "vxlan support not available for cisco-8122 platforms. L2 VxLAN is not supported on Broadcom TH4/TH5. Not required on isolated topologies d256u256s2, d96u32s2, d448u15-lag, and d128, as well as their minimzed and -v6 variants."
     conditions_logical_operator: OR
     conditions:
       - "platform in ['x86_64-8122_64eh_o-r0', 'x86_64-8122_64ehf_o-r0']"
+      - "asic_gen in ['th4', 'th5'] and release in ['202503', '202505', '202511']"
       - *noVxlanTopos
   xfail:
     reason: "Skipped due to bug https://github.com/sonic-net/sonic-buildimage/issues/22056"
