@@ -169,7 +169,6 @@ def sonic_update_firmware(duthost, localhost, image_url, upgrade_type, upgrade_s
     upgrade_strategy.preload_firmware(duthost, localhost, image_url, image_name, md5sum[0])
 
     out = duthost.command("sonic_installer binary_version {}".format(image_path))
-    target_version = out['stdout'].rstrip('\n')
 
     logger.info("Step 3 Install image")
     if (upgrade_type == REBOOT_TYPE_COLD or upgrade_type == REBOOT_TYPE_SOFT):
@@ -183,10 +182,7 @@ def sonic_update_firmware(duthost, localhost, image_url, upgrade_type, upgrade_s
     patch_rsyslog(duthost)
 
     if duthost.shell("ls /host/old_config/minigraph.xml", module_ignore_errors=True)['rc'] == 0:
-        # Do not delete old_config DB files for 202511 images
-        # NOTE: Workaround until ADO: 36697420 is resolved
-        if "202511" not in target_version:
-            duthost.shell("rm -f /host/old_config/config_db.json")
-            duthost.shell("rm -f /host/old_config/golden_config_db.json", module_ignore_errors=True)
+        duthost.shell("rm -f /host/old_config/config_db.json")
+        duthost.shell("rm -f /host/old_config/golden_config_db.json", module_ignore_errors=True)
 
     return out['stdout'].rstrip('\n')
