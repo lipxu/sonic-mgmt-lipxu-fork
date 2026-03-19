@@ -959,7 +959,6 @@
         become: true
         shell: config bgp startup all
 
-      - name: Configure AZNG Production on T2 Chassis Upstream LC only.
       - name: Wait for DPU control planes to boot after config reload
         pause:
           seconds: 300
