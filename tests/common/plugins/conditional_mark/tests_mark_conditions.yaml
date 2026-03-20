@@ -272,6 +272,18 @@ bfd/test_bfd_traffic.py:
 #######################################
 #####            bgp              #####
 #######################################
+bgp/reliable_tsa/test_reliable_tsa_flaky.py:
+  skip:
+    reason: "reliable TSA is not supported on non-chassis"
+    conditions:
+      - "is_chassis==False"
+
+bgp/reliable_tsa/test_reliable_tsa_stable.py:
+  skip:
+    reason: "reliable TSA is not supported on non-chassis"
+    conditions:
+      - "is_chassis==False"
+
 bgp/test_bgp_allow_list.py:
   skip:
     reason: "Only supported on t1 topo. But Cisco 8111 or 8122 T1(compute ai) platform is not supported."
@@ -937,12 +949,6 @@ dhcp_relay/test_dhcp_relay.py::test_dhcp_relay_monitor_checksum_validation:
     reason: "xfail due to GitHub issue https://github.com/sonic-net/sonic-buildimage/issues/24402"
     conditions:
       - "https://github.com/sonic-net/sonic-buildimage/issues/24402 and asic_type in ['mellanox', 'nvidia']"
-
-dhcp_relay/test_dhcp_relay.py::test_dhcp_relay_on_dualtor_standby:
-  skip:
-    reason: "The test case only tests DHCP relay on the dualtor standby dut"
-    conditions:
-      - "'dualtor' not in topo_name"
 
 dhcp_relay/test_dhcp_relay.py::test_dhcp_relay_random_sport:
   skip:
@@ -3471,9 +3477,10 @@ pc/test_lag_member.py:
 pc/test_lag_member_forwarding.py:
   xfail:
     reason: "Not supported on BRCM before SDK 13.x"
-    conditions_logical_operator: and
+    conditions_logical_operator: or
     conditions:
         - "asic_type in ['broadcom'] and https://github.com/sonic-net/sonic-buildimage/issues/21938"
+        - "asic_type in ['mellanox', 'nvidia'] and https://github.com/sonic-net/sonic-mgmt/issues/17095"
 
 pc/test_po_cleanup.py:
   skip:
@@ -3879,9 +3886,11 @@ qos/test_qos_sai.py::TestQosSai::testQosSaiDot1pQueueMapping:
 
 qos/test_qos_sai.py::TestQosSai::testQosSaiDscpEcn:
   skip:
-    reason: "Unsupported testbed type."
+    reason: "Unsupported testbed type or test fails on all topologies. https://github.com/sonic-net/sonic-mgmt/issues/23059"
+    conditions_logical_operator: or
     conditions:
       - "asic_type not in ['broadcom'] and asic_subtype not in ['broadcom-dnx']"
+      - "https://github.com/sonic-net/sonic-mgmt/issues/23059"
 
 qos/test_qos_sai.py::TestQosSai::testQosSaiDscpQueueMapping:
   skip:
