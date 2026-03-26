@@ -641,12 +641,12 @@ class GenerateGoldenConfigDBModule(object):
                 "localhost" not in ori_config_db["DEVICE_METADATA"]:
             # DEVICE_METADATA is absent from the golden_config_db (e.g. for t1
             # topologies where golden config starts empty). Read the full
-            # localhost entry from the running configDB so that
+            # localhost entry from the minigraph so that
             # config override-config-table receives a *complete* entry
             # (preserving hwsku, mac, hostname, etc.) rather than a bare
             # {"zebra_nexthop": ...} stub that would wipe those fields.
             rc, out, err = self.module.run_command(
-                "sonic-cfggen -d --var-json DEVICE_METADATA"
+                "sonic-cfggen -H -m --var-json DEVICE_METADATA"
             )
             if rc != 0 or not out.strip():
                 return config
