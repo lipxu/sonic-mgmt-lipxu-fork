@@ -16,8 +16,6 @@ logger = logging.getLogger(__name__)
 config_sources = ['config_db', 'minigraph', 'running_golden_config']
 
 
-
-
 # Timeouts for smartswitch DPU state transitions (in seconds)
 DPU_STATE_TIMEOUT = 360
 DPU_STATE_INTERVAL = 30
