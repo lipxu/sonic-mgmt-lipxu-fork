@@ -256,6 +256,7 @@ def config_reload(sonic_host, config_source='config_db', wait=120, start_bgp=Tru
         mg_facts = sonic_host.minigraph_facts(host=sonic_host.hostname)['ansible_facts']
         zebra_nexthop = mg_facts.get('minigraph_device_metadata', {}).get('zebra_nexthop')
         if zebra_nexthop:
+            logger.info("Setting zebra_nexthop='{}' in CONFIG_DB DEVICE_METADATA".format(zebra_nexthop))
             sonic_host.shell(
                 'sonic-db-cli CONFIG_DB hset "DEVICE_METADATA|localhost" zebra_nexthop {}'.format(zebra_nexthop)
             )
