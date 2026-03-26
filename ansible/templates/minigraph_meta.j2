@@ -177,10 +177,13 @@
             <a:Value>{{ max_cores }}</a:Value>
           </a:DeviceProperty>
 {% endif %}
+{# ZebraNexthop: disabled for T0 (ToR) and T1 (Leaf) topologies, enabled for all others. #}
+{# Exception lists allow per-hwsku overrides if specific platforms need different behavior. #}
 {% set t0_exception_hwskus = [
 ] %}
 {% set t1_exception_hwskus = [
 ] %}
+{# Default to enabled -- applies to topologies not matched below. #}
 {% set zebra_nexthop_value = 'enabled' %}
 {% if 'ToRRouter' in vm_topo_config['dut_type'] and hwsku not in t0_exception_hwskus %}
 {% set zebra_nexthop_value = 'disabled' %}
