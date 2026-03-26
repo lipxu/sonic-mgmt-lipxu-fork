@@ -638,6 +638,9 @@ class GenerateGoldenConfigDBModule(object):
         zebra_nexthop = self._parse_zebra_nexthop_from_minigraph()
         if zebra_nexthop is None:
             return config
+        if zebra_nexthop not in ("enabled", "disabled"):
+            self.module.fail_json(
+                msg="Invalid zebra_nexthop value '{}': must be 'enabled' or 'disabled'".format(zebra_nexthop))
         ori_config_db = json.loads(config)
         if "DEVICE_METADATA" not in ori_config_db or \
                 "localhost" not in ori_config_db["DEVICE_METADATA"]:
