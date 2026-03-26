@@ -257,7 +257,7 @@ def config_reload(sonic_host, config_source='config_db', wait=120, start_bgp=Tru
         zebra_nexthop = mg_facts.get('minigraph_device_metadata', {}).get('zebra_nexthop')
         if zebra_nexthop:
             sonic_host.shell(
-                "sonic-db-cli CONFIG_DB hset DEVICE_METADATA|localhost zebra_nexthop {}".format(zebra_nexthop)
+                'sonic-db-cli CONFIG_DB hset "DEVICE_METADATA|localhost" zebra_nexthop {}'.format(zebra_nexthop)
             )
         time.sleep(60)
         if start_bgp:
