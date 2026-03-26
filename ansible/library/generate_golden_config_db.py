@@ -623,8 +623,10 @@ class GenerateGoldenConfigDBModule(object):
                             value_elem = child
                     if name_elem is not None and name_elem.text == 'ZebraNexthop' and value_elem is not None:
                         return value_elem.text
-        except Exception:
-            pass
+        except FileNotFoundError:
+            self.module.warn("Minigraph file not found: /etc/sonic/minigraph.xml")
+        except ET.ParseError as e:
+            self.module.warn("Failed to parse minigraph XML: {}".format(e))
         return None
 
     def update_zebra_nexthop_config(self, config):
