@@ -140,6 +140,21 @@
   auto_recover: 'True'
   comment: topo_with_12_vms
 
+- conf-name: ptp-7050cx3-1
+  group-name:
+  topo: ptp-34
+  ptf_image_name: ''
+  ptf: ''
+  ptf_ip: ''
+  ptf_ipv6: ''
+  server: ''
+  vm_base: ''
+  dut:
+  - str-7050cx3-c17-u39
+  inv_name: str
+  auto_recover: 'True'
+  comment: v-ryannikan
+
 - conf-name: vms20-t1-7050cx3-3
   group-name: vms20-8
   topo: t1-lag
@@ -4483,6 +4498,21 @@
   auto_recover: 'True'
   comment: v-ryannikan
 
+- conf-name: ptp-8101-2
+  group-name:
+  topo: ptp-56
+  ptf_image_name: ''
+  ptf: ''
+  ptf_ip: ''
+  ptf_ipv6: ''
+  server: ''
+  vm_base: ''
+  dut:
+  - str-8101-temp01
+  inv_name: str
+  auto_recover: 'True'
+  comment: v-ryannikan
+
 - conf-name: ptp-8111-1
   group-name:
   topo: ptp-64
@@ -5720,6 +5750,23 @@
   vm_base: ''
   dut:
   - str43-7060x6-64pe-lt2
+  inv_name: str
+  auto_recover: 'True'
+  comment: v-shankam
+
+- conf-name: ptp-robot-sn2700-1
+  group-name:
+  topo: ptp-32
+  robot_server: str43-3po-robot
+  robot_id: 2
+  ptf_image_name: ''
+  ptf: ''
+  ptf_ip: ''
+  ptf_ipv6: ''
+  server: ''
+  vm_base: ''
+  dut:
+  - 3pos-sn2700-e11-34
   inv_name: str
   auto_recover: 'True'
   comment: v-shankam
