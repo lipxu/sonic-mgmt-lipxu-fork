@@ -594,26 +594,15 @@ class GenerateGoldenConfigDBModule(object):
         ori_config_db = json.loads(config)
         if "DEVICE_METADATA" not in ori_config_db or \
                 "localhost" not in ori_config_db["DEVICE_METADATA"]:
-            # DEVICE_METADATA is absent from the golden_config_db (e.g. for t1
-            # topologies where golden config starts empty). Read the full
-            # localhost entry from the minigraph so that
-            # config override-config-table receives a *complete* entry
-            # (preserving hwsku, mac, hostname, etc.) rather than a bare
-            # {"zebra_nexthop": ...} stub that would wipe those fields.
-            rc, out, err = self.module.run_command(
-                "sonic-cfggen -H -m --var-json DEVICE_METADATA"
-            )
-            if rc != 0 or not out.strip():
-                return config
-            try:
-                device_metadata = json.loads(out)
-            except ValueError:
-                return config
-            if "localhost" not in device_metadata:
-                return config
-            if "DEVICE_METADATA" not in ori_config_db:
-                ori_config_db["DEVICE_METADATA"] = {}
-            ori_config_db["DEVICE_METADATA"]["localhost"] = device_metadata["localhost"]
+            # When DEVICE_METADATA is absent from the golden config (e.g. T0/T1
+            # topologies), do not inject a minigraph-derived entry here.
+            # config_reload.py already restores zebra_nexthop via an additive
+            # hset after every minigraph-based config reload, so no golden-config
+            # override is needed.  Injecting a full minigraph entry here would
+            # cause config override-config-table (which uses set_entry / REPLACE
+            # semantics) to wipe fields such as default_pfcwd_status that are
+            # present in the running config_db but absent from minigraph output.
+            return config
         ori_config_db["DEVICE_METADATA"]["localhost"]["zebra_nexthop"] = zebra_nexthop
         return json.dumps(ori_config_db, indent=4)
 
