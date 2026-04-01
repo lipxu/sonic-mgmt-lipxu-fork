@@ -137,6 +137,8 @@ stages:
     - checkout: self
     - checkout: https://mssonic@dev.azure.com/mssonic/internal/_git/sonic-metadata
 
+    - checkout: https://mssonic@dev.azure.com/mssonic/internal/_git/sonic-upgrade-scripts
+
     - template: ../nightly/templates/get_secrets.yml
       parameters:
         BASE_DIR: sonic-mgmt-int
