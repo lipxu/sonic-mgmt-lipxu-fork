@@ -3764,6 +3764,12 @@ qos/test_ecn_config.py:
     conditions:
       - "asic_type not in ['cisco-8000', 'broadcom']"
 
+qos/test_ecn_config.py::test_verify_ecn_marking_config:
+  xfail:
+    reason: "Cisco-8101-O8V48 testbed is not supported."
+    conditions:
+      - "hwsku in ['Cisco-8101-O8V48']"
+
 qos/test_oq_watchdog.py:
   skip:
     reason: "OQ watchdog tests only apply to cisco 8000 platforms."
@@ -4044,6 +4050,10 @@ qos/test_qos_sai.py::TestQosSai::testQosSaiXonHysteresis:
     conditions:
       - "platform not in ['x86_64-8102_64h_o-r0', 'x86_64-8101_32fh_o-r0', 'x86_64-8111_32eh_o-r0']"
       - "asic_type not in ['cisco-8000']"
+  xfail:
+    reason: "Cisco-8101-O8V48 testbed is not supported."
+    conditions:
+      - "hwsku in ['Cisco-8101-O8V48']"
 
 qos/test_tunnel_qos_remap.py:
   skip:
