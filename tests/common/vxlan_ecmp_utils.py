@@ -408,7 +408,7 @@ class Ecmp_Utils(object):
         cmd = "cat /tmp/{}".format(filename)
         cmd_response = duthost.shell(cmd, module_ignore_errors=True)
         Logger.info("cmd {} response: {}".format(cmd, cmd_response.get('stdout', None)))
-   
+
 
         duthost.shell(
             'docker exec -i swss swssconfig /dev/stdin < /tmp/{}'.format(
