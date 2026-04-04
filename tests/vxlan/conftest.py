@@ -339,7 +339,6 @@ def vnet_config(minigraph_facts, vnet_test_params, scaled_vnet_params):
             join(TEMPLATE_DIR, "vnet_config.j2")).render(combined_args))
 
 
-
 # @pytest.fixture(scope="function", autouse=True)
 # def dump_config(duthosts, rand_one_dut_hostname):
 #     duthost = duthosts[rand_one_dut_hostname]
@@ -376,7 +375,6 @@ def vnet_config(minigraph_facts, vnet_test_params, scaled_vnet_params):
 #     logger.info("##### dump_config after running tests done #####")
 
 
-
 # @pytest.fixture(scope="module", autouse=True)
 # def dump_syslog(duthosts, rand_one_dut_hostname):
 #     duthost = duthosts[rand_one_dut_hostname]
@@ -395,12 +393,9 @@ def vnet_config(minigraph_facts, vnet_test_params, scaled_vnet_params):
 #     logger.info("##### dump_syslog after running tests done #####")
 
 
-
 @pytest.fixture(scope="module", autouse=True)
 def restore_config_by_config_reload(duthosts, rand_one_dut_hostname):
     yield
     duthost = duthosts[rand_one_dut_hostname]
     logger.info("Restore config after running tests")
     config_reload(duthost, safe_reload=True)
-
-

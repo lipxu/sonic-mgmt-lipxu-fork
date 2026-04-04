@@ -356,28 +356,23 @@ class Test_VxLAN_route_Advertisement():
         else:
             self.prefix_type = 'v6'
 
-
         Logger.info("###### gnenrate_vnet_routes")
         routes = self.gnenrate_vnet_routes(encap_type, 1)
-        
-        
+
         Logger.info("###### add_unmonitored_vnet_route")
         time.sleep(60)
         self.add_unmonitored_vnet_route(routes, "")
-
 
         Logger.info("###### verify_nighbor_has_routes")
         time.sleep(15)
         time.sleep(WAIT_TIME)
         self.verify_nighbor_has_routes(routes, "")
 
-
         Logger.info("###### remove_unmonitored_vnet_route")
         time.sleep(15)
         self.remove_unmonitored_vnet_route(routes)
         time.sleep(15)
         time.sleep(WAIT_TIME)
-
 
         Logger.info("###### verify_nighbor_doesnt_have_routes")
         self.verify_nighbor_doesnt_have_routes(routes, "")
