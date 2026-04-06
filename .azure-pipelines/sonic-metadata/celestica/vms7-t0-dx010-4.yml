@@ -9,6 +9,10 @@ resources:
     type: git
     name: sonic-metadata
     ref: master
+  - repository: https://mssonic@dev.azure.com/mssonic/internal/_git/sonic-upgrade-scripts
+    type: git
+    name: sonic-upgrade-scripts
+    ref: main
 
 variables:
   - group: SONIC_IMAGE_URLS

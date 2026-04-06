@@ -9,6 +9,10 @@ resources:
     # Production artifacts e.g. acl_remover.tar.gz don't exist in our test environment and attempting to download will cause an error and fail the test then and there.
     # As a temporary workaround, use a dev branch that doesn't download these artifacts. Refer to https://msazure.visualstudio.com/One/_workitems/edit/31816278  for long-term fix.
     ref: rgarthwaite/workaround-dont-download-in-preload-firmware
+  - repository: https://mssonic@dev.azure.com/mssonic/internal/_git/sonic-upgrade-scripts
+    type: git
+    name: sonic-upgrade-scripts
+    ref: main
 variables:
   - group: SONIC_IMAGE_URLS
   - group: SAITHRIFT_URLS

@@ -7,6 +7,10 @@ resources:
     type: git
     name: sonic-metadata
     ref: master
+  - repository: https://mssonic@dev.azure.com/mssonic/internal/_git/sonic-upgrade-scripts
+    type: git
+    name: sonic-upgrade-scripts
+    ref: main
 variables:
   - group: SONIC_IMAGE_URLS
   - group: SAITHRIFT_URLS
@@ -355,6 +359,7 @@ stages:
     steps:
     - checkout: self
     - checkout: https://mssonic@dev.azure.com/mssonic/internal/_git/sonic-metadata
+    - checkout: https://mssonic@dev.azure.com/mssonic/internal/_git/sonic-upgrade-scripts
     - template: step_metadata_unit_test.yml
 
   - job:
@@ -364,6 +369,7 @@ stages:
     steps:
     - checkout: self
     - checkout: https://mssonic@dev.azure.com/mssonic/internal/_git/sonic-metadata
+    - checkout: https://mssonic@dev.azure.com/mssonic/internal/_git/sonic-upgrade-scripts
     - template: step_metadata_linter.yml
 
 - template: metadata_upgrade_template.yml
