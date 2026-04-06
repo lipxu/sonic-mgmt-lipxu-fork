@@ -7,7 +7,6 @@ import re
 import sys
 import time
 
-from tests.common.db_comparison import dut_dump
 
 if sys.version_info.major > 2:
     from pathlib import Path
