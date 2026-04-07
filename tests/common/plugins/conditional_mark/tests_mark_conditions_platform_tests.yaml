@@ -382,6 +382,15 @@ platform_tests/api/test_fan_drawer_fans.py::TestFanDrawerFans::test_set_fans_spe
       - https://github.com/sonic-net/sonic-mgmt/issues/6512
 
 #######################################
+#####   test_liquid_cooling_leakage.py   #####
+#######################################
+platform_tests/api/test_liquid_cooling_leakage.py:
+  skip:
+    reason: "Liquid cooling leakage tests not applicable to m0, mx, m1, c0 topologies"
+    conditions:
+      - "topo_type in ['m0', 'mx', 'm1', 'c0']"
+
+#######################################
 ##### api/test_module.py #####
 #######################################
 platform_tests/api/test_module.py:
@@ -1245,6 +1254,15 @@ platform_tests/test_kdump.py:
       - "platform in ['armhf-nokia_ixs7215_52x-r0']"
 
 #######################################
+#####   test_liquid_cooling_leakage_detection.py   #####
+#######################################
+platform_tests/test_liquid_cooling_leakage_detection.py:
+  skip:
+    reason: "Liquid cooling leakage detection tests not applicable to m0, mx, m1, c0 topologies"
+    conditions:
+      - "topo_type in ['m0', 'mx', 'm1', 'c0']"
+
+#######################################
 ####  test_memory_exhaustion.py   #####
 #######################################
 platform_tests/test_memory_exhaustion.py:
@@ -1462,6 +1480,15 @@ platform_tests/test_xcvr_info_in_db.py::test_xcvr_info_in_db:
     conditions:
       - "platform in ['x86_64-cel_e1031-r0']"
       - https://github.com/sonic-net/sonic-buildimage/issues/18231
+
+####################################################
+#####   test_dpu_show_platform_temperature.py  #####
+####################################################
+smartswitch/platform_tests/test_dpu_show_platform_temperature.py:
+  skip:
+    reason: "Skip on the platforms not explicitly supported in the code"
+    conditions:
+      - "platform not in ['arm64-nvda_bf-bf3comdpu', 'arm64-nvda_bf-9009d3b600cvaa']"
 
 #######################################
 #####   test_platform_dpu.py   #####
