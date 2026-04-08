@@ -637,8 +637,15 @@ def parse_time_stamp(bgp_packets, ipv4_route_list, ipv6_route_list):
 
 def compute_middle_average_time(time_stamp_dict):
     time_delta_list = []
-    for _, timestamp_list in time_stamp_dict.items():
+    for prefix, timestamp_list in time_stamp_dict.items():
+        if len(timestamp_list) < 2:
+            logger.warning("Prefix {} has only {} timestamp(s) in PCAP, skipping.".format(
+                prefix, len(timestamp_list)))
+            continue
         time_delta_list.append(abs(timestamp_list[1] - timestamp_list[0]))
+    if not time_delta_list:
+        logger.warning("No valid timestamp pairs found in PCAP; returning 0 for all metrics.")
+        return 0, 0
     time_delta_list.sort()
 
     mid_delta_time = time_delta_list[(len(time_delta_list) - 1) // 2]
