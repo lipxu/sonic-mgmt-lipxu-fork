@@ -502,7 +502,10 @@ def test_show_platform_ssdhealth(duthosts, enum_supervisor_dut_hostname):
     supported_disks = ["SATA", "NVME", "EMMC"]
 
     platform_ssd_device_path_dict = {BF_3_PLATFORM: "/dev/nvme0"}
-    unsupported_ssd_values_per_platform = {AMD_ELBA_PLATFORM: ["Temperature"]}
+    unsupported_ssd_values_per_platform = {
+        AMD_ELBA_PLATFORM: ["Temperature"],
+        "x86_64-arista_7060_cx32s": ["Health", "Temperature", "Device Model"],  # 7060 eMMC has no SMART data
+    }
 
     # Build specific path to SSD device based on platform/ssd path mapping dict
     platform = duthost.facts['platform']
