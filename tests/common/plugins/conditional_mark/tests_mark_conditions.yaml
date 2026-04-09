@@ -4387,7 +4387,6 @@ session_monitor/test_bgp_session_tracker.py:
     conditions_logical_operator: OR
     conditions:
       - "hwsku not in ['Cisco-8102-28FH-DPU-C28']"
-      - "release not in ['202505']"
       - "topo_type not in ['t0']"
 
 session_monitor/test_link_state_tracker.py:
@@ -4396,7 +4395,6 @@ session_monitor/test_link_state_tracker.py:
     conditions_logical_operator: OR
     conditions:
       - "hwsku not in ['Cisco-8102-28FH-DPU-C28']"
-      - "release not in ['202505']"
       - "topo_type not in ['t0']"
 
 #######################################
