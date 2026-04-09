@@ -224,9 +224,9 @@ def _install_nano_bookworm(dut, creds, syncd_docker_name):
                 && TMPDIR=/var/tmp_build pip3 install --no-cache-dir nnpy \
                 && rm -rf /var/tmp_build \
                 && mkdir -p /opt && cd /opt && wget \
-                https://raw.githubusercontent.com/p4lang/ptf/master/ptf_nn/ptf_nn_agent.py \
+                https://raw.githubusercontent.com/p4lang/ptf/9d41838d634c479fc24fac7a527ec5ee2d0ce8eb/ptf_nn/ptf_nn_agent.py \
                 && mkdir ptf && cd ptf && wget \
-                https://raw.githubusercontent.com/p4lang/ptf/master/src/ptf/afpacket.py && touch __init__.py \
+                https://raw.githubusercontent.com/p4lang/ptf/9d41838d634c479fc24fac7a527ec5ee2d0ce8eb/src/ptf/afpacket.py && touch __init__.py \
                 && apt-get -y purge build-essential libssl-dev libffi-dev python3-dev \
                 python3-setuptools wget \
                 " '''.format(http_proxy, https_proxy, syncd_docker_name)
@@ -271,9 +271,9 @@ def _install_nano(dut, creds,  syncd_docker_name):
                     && mkdir -p build && cmake . && make install && ldconfig && cd .. && rm -rf nanomsg-1.0.0 \
                     && rm -f 1.0.0.tar.gz && pip3 install cffi && pip3 install --upgrade cffi && pip3 install nnpy \
                     && mkdir -p /opt && cd /opt && wget \
-                    https://raw.githubusercontent.com/p4lang/ptf/master/ptf_nn/ptf_nn_agent.py \
+                    https://raw.githubusercontent.com/p4lang/ptf/9d41838d634c479fc24fac7a527ec5ee2d0ce8eb/ptf_nn/ptf_nn_agent.py \
                     && mkdir ptf && cd ptf && wget \
-                    https://raw.githubusercontent.com/p4lang/ptf/master/src/ptf/afpacket.py && touch __init__.py \
+                    https://raw.githubusercontent.com/p4lang/ptf/9d41838d634c479fc24fac7a527ec5ee2d0ce8eb/src/ptf/afpacket.py && touch __init__.py \
                     " '''.format(http_proxy, https_proxy, syncd_docker_name)
         else:
             cmd = '''docker exec -e http_proxy={} -e https_proxy={} {} bash -c " \
@@ -288,9 +288,9 @@ def _install_nano(dut, creds,  syncd_docker_name):
                     && rm -f 1.0.0.tar.gz && pip2 install cffi==1.7.0 && pip2 install --upgrade \
                     cffi==1.7.0 && pip2 install nnpy \
                     && mkdir -p /opt && cd /opt && wget \
-                    https://raw.githubusercontent.com/p4lang/ptf/master/ptf_nn/ptf_nn_agent.py \
+                    https://raw.githubusercontent.com/p4lang/ptf/9d41838d634c479fc24fac7a527ec5ee2d0ce8eb/ptf_nn/ptf_nn_agent.py \
                     && mkdir ptf && cd ptf && wget \
-                    https://raw.githubusercontent.com/p4lang/ptf/master/src/ptf/afpacket.py && touch __init__.py \
+                    https://raw.githubusercontent.com/p4lang/ptf/9d41838d634c479fc24fac7a527ec5ee2d0ce8eb/src/ptf/afpacket.py && touch __init__.py \
                     " '''.format(http_proxy, https_proxy, syncd_docker_name)
         dut.command(cmd)
 
