@@ -663,6 +663,7 @@
 
       - name: Patch rsyslog configuration
         include_tasks: patch_rsyslog.yml
+        when: hwsku not in ['Nokia-7215', 'Nokia-M0-7215']
 
       - name: Cleanup /etc/sonic folder before loading new minigraph
         block:
