@@ -218,6 +218,18 @@ class TestShowLLDP():
         dutHostGuest, mode, ifmode = setup_config_mode
         minigraph_neighbors = setup['minigraph_facts']['minigraph_neighbors']
 
+        def _lldp_table_ready():
+            table = dutHostGuest.shell('SONIC_CLI_IFACE_MODE={} show lldp table'.format(ifmode))['stdout']
+            expected_intfs = lldp_interfaces['alias'] if mode == 'alias' else lldp_interfaces['interface']
+            return all(re.search(r'{}'.format(re.escape(intf)), table) for intf in expected_intfs)
+
+        pytest_assert(
+            wait_until(ESTABLISH_LLDP_NEIGHBOR_TIMEOUT, 10, 0, _lldp_table_ready),
+            "LLDP table did not converge with all expected interfaces within {} seconds".format(
+                ESTABLISH_LLDP_NEIGHBOR_TIMEOUT
+            )
+        )
+
         lldp_table = dutHostGuest.shell('SONIC_CLI_IFACE_MODE={} show lldp table'.format(ifmode))['stdout']
         logger.info('lldp_table:\n{}'.format(lldp_table))
 
