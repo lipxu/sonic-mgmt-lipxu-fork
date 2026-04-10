@@ -293,7 +293,7 @@ def is_orchagent_stopped(duthost):
     """
     Check if process 'orchagent' is stopped
     """
-    out = duthost.shell('cat /proc/$(pidof orchagent)/status | grep State')['stdout']
+    out = duthost.shell('cat /proc/$(pgrep -x orchagent)/status | grep State')['stdout']
     logger.info('Orchagent process - {}'.format(out))
     return ACTION_STOP in out
 

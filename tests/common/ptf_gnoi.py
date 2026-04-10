@@ -6,9 +6,8 @@ This module provides a user-friendly wrapper around PtfGrpc for gNOI
 gRPC complexity behind clean, Pythonic method interfaces.
 """
 import logging
-from typing import Dict
-import grpc
-from tests.common.ptf_grpc import GrpcCallError
+from typing import Dict, Optional
+from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +60,8 @@ class PtfGnoi:
         return response
 
     # File service operations
+    # TODO: Add file_get(), file_put(), file_remove() methods
+    # These are left for future implementation when gNOI File service is stable
 
     def file_stat(self, remote_file: str) -> Dict:
         """
@@ -99,72 +100,9 @@ class PtfGnoi:
             logger.info(f"Successfully got file stats: {remote_file}")
             return response
 
-        except GrpcCallError as e:
-            if e.code() == grpc.StatusCode.NOT_FOUND:
-                raise FileNotFoundError(f"File not found: {remote_file}") from e
-            raise
-
-    def file_transfer_to_remote(self, local_path: str, remote_url: str, protocol: str = "HTTP",
-                                username: str = None, password: str = None) -> Dict:
-        """
-        Transfer a file from a remote URL to a local path on the device.
-
-        Args:
-            local_path: Destination path on the device where file should be saved
-            remote_url: Source URL to download the file from
-            protocol: Transfer protocol ("HTTP", "HTTPS", "SFTP", "SCP")
-            username: Username for authentication (optional)
-            password: Password for authentication (optional)
-
-        Returns:
-            Dictionary containing:
-            - hash: Hash information of the transferred file
-
-        Raises:
-            GrpcConnectionError: If connection fails
-            GrpcCallError: If the gRPC call fails
-            GrpcTimeoutError: If the call times out
-            ValueError: If protocol is not supported
-        """
-        logger.debug(f"Transferring file from {remote_url} to {local_path}")
-
-        # Map protocol strings to enum values
-        protocol_map = {
-            "UNKNOWN": 0,
-            "SFTP": 1,
-            "HTTP": 2,
-            "HTTPS": 3,
-            "SCP": 4
-        }
-
-        if protocol.upper() not in protocol_map:
-            raise ValueError(f"Unsupported protocol: {protocol}. "
-                             f"Supported protocols: {list(protocol_map.keys())}")
-
-        # Build the request
-        request = {
-            "localPath": local_path,
-            "remoteDownload": {
-                "path": remote_url,
-                "protocol": protocol_map[protocol.upper()]
-            }
-        }
-
-        # Add credentials if provided
-        if username and password:
-            request["remoteDownload"]["credentials"] = {
-                "username": username,
-                "cleartext": password
-            }
-
-        try:
-            response = self.grpc_client.call_unary("gnoi.file.File", "TransferToRemote", request)
-
-            logger.info(f"Successfully transferred file from {remote_url} to {local_path}")
-            return response
-
         except Exception as e:
-            logger.error(f"Failed to transfer file from {remote_url} to {local_path}: {e}")
+            if "not found" in str(e).lower() or "no such file" in str(e).lower():
+                raise FileNotFoundError(f"File not found: {remote_file}") from e
             raise
 
     def __str__(self):
@@ -172,3 +110,186 @@ class PtfGnoi:
 
     def __repr__(self):
         return self.__str__()
+
+    def file_transfer_to_remote(
+        self,
+        url: str,
+        local_path: str,
+        protocol: Optional[str] = None,
+        credentials: Optional[Dict[str, str]] = None,
+    ) -> Dict:
+        """
+        Download a remote artifact to the DUT using gNOI File.TransferToRemote.
+
+        Notes on protocol:
+            - For http(s):// URLs, protocol can be inferred from the URL scheme.
+            - Some server implementations require an explicit protocol, and some paths may not
+            be standard URLs (implementation-specific). Therefore protocol remains an
+            optional override:
+                * If protocol is None, infer from URL scheme (http/https).
+                * If scheme is unknown/empty, protocol must be provided explicitly.
+
+        Args:
+            url: Remote URL/path to download from (e.g., http(s)://...)
+            local_path: Destination path on DUT (mapped to gNOI request field 'local_path')
+            protocol: Optional RemoteDownloadProtocol enum name (e.g., "HTTP", "HTTPS").
+                    If None, infer from url scheme.
+            credentials: Optional credentials dict {"username": "...", "password": "..."}.
+            remote_extra: Optional dict merged into 'remote_download' (implementation-specific).
+
+        Returns:
+            Dictionary response from gNOI server.
+
+        Raises:
+            GrpcConnectionError / GrpcCallError / GrpcTimeoutError:
+                As raised by underlying grpc_client.call_unary.
+            ValueError: If inputs are invalid or protocol cannot be inferred.
+        """
+        if not url:
+            raise ValueError("url must be provided")
+        if not local_path:
+            raise ValueError("local_path must be provided")
+
+        scheme = urlparse(url).scheme.lower()
+
+        # Infer protocol if not explicitly provided
+        if protocol is None:
+            if scheme == "https":
+                protocol = "HTTPS"
+            elif scheme == "http":
+                protocol = "HTTP"
+            else:
+                raise ValueError(
+                    f"protocol must be provided when url scheme is '{scheme or 'empty'}'"
+                )
+
+        protocol = str(protocol).upper()
+
+        # Optional: warn if the override conflicts with URL scheme
+        if scheme == "https" and protocol == "HTTP":
+            logger.warning("url is https:// but protocol=HTTP; did you mean HTTPS?")
+        elif scheme == "http" and protocol == "HTTPS":
+            logger.warning("url is http:// but protocol=HTTPS; did you mean HTTP?")
+
+        logger.debug(
+            "TransferToRemote via gNOI File.TransferToRemote: url=%s local_path=%s protocol=%s",
+            url, local_path, protocol,
+        )
+
+        remote_download = {"path": url, "protocol": protocol}
+
+        if credentials:
+            remote_download["credentials"] = credentials
+
+        request = {
+            "localPath": local_path,
+            "remoteDownload": remote_download,
+        }
+
+        response = self.grpc_client.call_unary("gnoi.file.File", "TransferToRemote", request)
+        logger.info("TransferToRemote completed: %s -> %s", url, local_path)
+        return response
+
+    def system_set_package(
+        self,
+        local_path: str,
+        version: Optional[str] = None,
+        activate: bool = True,
+    ) -> Dict:
+        """
+        Set the upgrade package on the DUT using gNOI System.SetPackage (client-streaming RPC).
+
+        Sends a single stream message containing package metadata:
+        {"package": {<package_field>: <local_path>, "version": ..., "activate": ...}}
+
+        Note: Some server implementations may also require a separate hash message (MD5/SHA).
+        This version intentionally omits hash support.
+
+        Args:
+            local_path: Path to the package/image on DUT (typically produced by TransferToRemote)
+            package_field: Field name used by server inside 'package' ("filename" or "path")
+            version: Optional version string
+            activate: Whether to activate/switch to the package (commonly required to update "Next")
+
+        Returns:
+            Dictionary response from gNOI server.
+        """
+        if not local_path:
+            raise ValueError("local_path must be provided")
+
+        logger.debug(
+            "SetPackage via gNOI System.SetPackage (streaming): filename=%s version=%s activate=%s",
+            local_path, version, activate,
+        )
+
+        pkg: Dict[str, object] = {
+            "filename": local_path,
+            "activate": bool(activate),
+        }
+        if version:
+            pkg["version"] = version
+
+        response = self.grpc_client.call_client_streaming(
+            "gnoi.system.System",
+            "SetPackage",
+            [{"package": pkg}],
+        )
+
+        logger.info("SetPackage completed: %s", local_path)
+        return response
+
+    def system_reboot(
+        self,
+        method: str,
+        delay: Optional[int] = None,
+        message: Optional[str] = None,
+        force: bool = False,
+    ) -> Dict:
+        """
+        Reboot the DUT using gNOI System.Reboot.
+
+        Note:
+            Blocking behavior is server/implementation dependent and is NOT
+            controlled by this client wrapper.
+            In most SONiC/embedded implementations, System.Reboot behaves like a
+            "trigger" RPC:
+            - The server may start rebooting immediately after receiving the request.
+            - The gRPC/TLS channel can be torn down mid-RPC as the control plane goes down.
+            - As a result, the client may observe UNAVAILABLE/EOF/connection reset even
+                if the reboot was successfully initiated.
+
+            Even when the RPC returns successfully, it typically only confirms the reboot
+            request was accepted, not that the device has completed reboot and is ready.
+
+        Args:
+            method: RebootMethod enum name (e.g., "WARM", "COLD")
+            delay: Optional delay (seconds) before reboot, if supported by server
+            message: Optional reboot message/reason string
+            force: Optional force flag (if supported by server)
+
+        Returns:
+            Dictionary response from gNOI server.
+
+        Raises:
+            GrpcConnectionError / GrpcCallError / GrpcTimeoutError:
+                As raised by underlying grpc_client.call_unary.
+            ValueError: If inputs are invalid.
+        """
+        if not method:
+            raise ValueError("method must be provided")
+
+        request: Dict = {"method": method}
+
+        # Only include optional fields if specified
+        if delay is not None:
+            request["delay"] = delay
+        if message:
+            request["message"] = message
+        if force:
+            request["force"] = True
+
+        logger.debug("Reboot via gNOI System.Reboot: %s", request)
+
+        response = self.grpc_client.call_unary("gnoi.system.System", "Reboot", request)
+        logger.info("Reboot request sent: method=%s delay=%s force=%s", method, delay, force)
+        return response
