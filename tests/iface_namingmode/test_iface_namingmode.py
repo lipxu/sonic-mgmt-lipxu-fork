@@ -14,6 +14,7 @@ pytestmark = [
 logger = logging.getLogger(__name__)
 
 
+ESTABLISH_LLDP_NEIGHBOR_TIMEOUT = 90
 PORT_TOGGLE_TIMEOUT = 30
 
 def skip_test_for_multi_asic(duthosts,enum_rand_one_per_hwsku_frontend_hostname ):
