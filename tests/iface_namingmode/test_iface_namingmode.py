@@ -14,7 +14,6 @@ pytestmark = [
 logger = logging.getLogger(__name__)
 
 
-ESTABLISH_LLDP_NEIGHBOR_TIMEOUT = 90
 PORT_TOGGLE_TIMEOUT = 30
 
 def skip_test_for_multi_asic(duthosts,enum_rand_one_per_hwsku_frontend_hostname ):
@@ -219,10 +218,13 @@ class TestShowLLDP():
         dutHostGuest, mode, ifmode = setup_config_mode
         minigraph_neighbors = setup['minigraph_facts']['minigraph_neighbors']
 
+        lldp_table_result = {}
+
         def _lldp_table_ready():
-            table = dutHostGuest.shell('SONIC_CLI_IFACE_MODE={} show lldp table'.format(ifmode))['stdout']
+            lldp_table_result['output'] = dutHostGuest.shell(
+                'SONIC_CLI_IFACE_MODE={} show lldp table'.format(ifmode))['stdout']
             expected_intfs = lldp_interfaces['alias'] if mode == 'alias' else lldp_interfaces['interface']
-            return all(re.search(r'{}'.format(re.escape(intf)), table) for intf in expected_intfs)
+            return all(re.search(re.escape(intf), lldp_table_result['output']) for intf in expected_intfs)
 
         pytest_assert(
             wait_until(ESTABLISH_LLDP_NEIGHBOR_TIMEOUT, 10, 0, _lldp_table_ready),
@@ -231,7 +233,7 @@ class TestShowLLDP():
             )
         )
 
-        lldp_table = dutHostGuest.shell('SONIC_CLI_IFACE_MODE={} show lldp table'.format(ifmode))['stdout']
+        lldp_table = lldp_table_result['output']
         logger.info('lldp_table:\n{}'.format(lldp_table))
 
         if mode == 'alias':
