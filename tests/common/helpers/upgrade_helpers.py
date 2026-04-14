@@ -4,6 +4,7 @@ import tempfile
 import random
 import re
 from six.moves.urllib.parse import urlparse
+import ipaddress
 from tests.common.helpers.assertions import pytest_assert
 from tests.common import reboot
 from tests.common.reboot import get_reboot_cause, reboot_ctrl_dict
@@ -330,3 +331,21 @@ def multi_hop_warm_upgrade_test_helper(duthost, localhost, ptfhost, tbinfo, get_
 
     if enable_cpa and "warm-reboot" in reboot_type:
         ptfhost.shell('supervisorctl stop ferret')
+
+
+def add_pfc_storm_table(duthost):
+    current_os_version = duthost.image_facts()["ansible_facts"]["ansible_image_facts"]["current"]
+    if "201811" in current_os_version:
+        # There is a known issue resulting in dataplane implact during the warm-upgrade recovery
+        # process if an upgrade is attempted with the PFC storm table present. Refer to
+        # BRCM: CS00012297394 for details
+        logger.info("PFC storm table is not supported on 201811.")
+        return
+    COUNTER_OID_3 = duthost.command('redis-cli -n 2 hget "COUNTERS_QUEUE_NAME_MAP"  "Ethernet4:3"')['stdout'].rstrip('\n')
+    duthost.command('redis-cli -n 2 hset "COUNTERS:{}" "DEBUG_STORM" "enabled"'.format(COUNTER_OID_3))
+    COUNTER_OID_4 = duthost.command('redis-cli -n 2 hget "COUNTERS_QUEUE_NAME_MAP"  "Ethernet4:4"')['stdout'].rstrip('\n')
+    duthost.command('redis-cli -n 2 hset "COUNTERS:{}" "DEBUG_STORM" "enabled"'.format(COUNTER_OID_4))
+
+    duthost.command('redis-cli -n 2 hset "COUNTERS:{}" "DEBUG_STORM" "disabled"'.format(COUNTER_OID_3))
+    duthost.command('redis-cli -n 2 hset "COUNTERS:{}" "DEBUG_STORM" "disabled"'.format(COUNTER_OID_4))
+    logger.info("PFC storm table added.")
