@@ -9,7 +9,7 @@ class IxiaHost (AnsibleHostBase):
     """ This class is a place-holder for running ansible module on Ixia
     fanout devices in future (TBD).
     """
-    def __init__ (self, ansible_adhoc, os, hostname, device_type) :
+    def __init__(self, ansible_adhoc, os, hostname, device_type):
         """ Initializing Ixia fanout host for using ansible modules.
 
         Note: Right now, it is just a place holder.
@@ -22,10 +22,23 @@ class IxiaHost (AnsibleHostBase):
         """
 
         self.ansible_adhoc = ansible_adhoc
-        self.os            = os
-        self.hostname      = hostname
-        self.device_type   = device_type
-        super().__init__(IxiaHost, self)
+        self.os = os
+        self.hostname = hostname
+        self.device_type = device_type
+        # Do not call AnsibleHostBase.__init__ because IxiaHost uses a different constructor signature.
+        # Set self.host to None to prevent AttributeError in __getattr__
+        self.host = None
+
+    def __getattr__(self, module_name):
+        """Override parent's __getattr__ to provide a clear error message.
+
+        IxiaHost does not support Ansible module execution like other host types.
+        This is a placeholder class for future Ixia fanout device support.
+        """
+        raise NotImplementedError(
+            "IxiaHost does not support Ansible module execution. "
+            "Attempted to call '{}' on IxiaHost '{}'".format(module_name, self.hostname)
+        )
 
     def __str__(self):
         return '<IxiaHost {}>'.format(self.hostname)
@@ -33,7 +46,7 @@ class IxiaHost (AnsibleHostBase):
     def __repr__(self):
         return self.__str__()
 
-    def get_host_name (self):
+    def get_host_name(self):
         """Returns the Ixia hostname
 
         Args:
@@ -41,7 +54,7 @@ class IxiaHost (AnsibleHostBase):
         """
         return self.hostname
 
-    def get_os (self) :
+    def get_os(self):
         """Returns the os type of the ixia device.
 
         Args:
@@ -49,11 +62,21 @@ class IxiaHost (AnsibleHostBase):
         """
         return self.os
 
-    def execute (self, cmd) :
+    def execute(self, cmd):
         """Execute a given command on ixia fanout host.
 
         Args:
            cmd (str): Command to be executed.
         """
-        if (self.os == 'ixia') :
+        if (self.os == 'ixia'):
             eval(cmd)
+
+    def is_lldp_disabled(self):
+        """
+        TODO: Add support for IXIA device when access to
+        IXIA fanout becomes available.
+
+        Return False always. If IXIA device is found as a
+        fanout the pretest will fail until this check is implemented.
+        """
+        return False

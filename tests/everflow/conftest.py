@@ -1,15 +1,19 @@
 import pytest
 
-@pytest.fixture(scope="module", autouse=True)
-def skip_everflow_test(tbinfo):
-    """
-    Skip everflow tests on certain testbed types
 
-    Args:
-        tbinfo(fixture): testbed related info fixture
+@pytest.fixture(scope="session")
+def everflow_capabilities(duthosts):
+    """Collect switch capability facts once for Everflow tests.
 
-    Yields:
-        None
+    Returns:
+        dict: hostname -> switch capability dict (STATE_DB switch_capabilities)
     """
-    if 'backend' in tbinfo['topo']['name']:
-        pytest.skip("Skipping everflow tests. Unsupported topology {}".format(tbinfo['topo']['name']))
+    caps = {}
+    for dut in duthosts:
+        facts = dut.switch_capabilities_facts()
+        switch_caps = (facts
+                       .get("ansible_facts", {})
+                       .get("switch_capabilities", {})
+                       .get("switch", {}))
+        caps[dut.hostname] = switch_caps
+    return caps
