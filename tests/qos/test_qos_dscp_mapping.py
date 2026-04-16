@@ -504,6 +504,13 @@ class TestQoSSaiDSCPQueueMapping_IPIP_Base():
         duthost = rand_selected_dut
         inner_dst_ip_list = route_config
 
+        # Broadcom TH (Tomahawk 1) does not support IPIP pipe mode:
+        # hardware always uses outer DSCP for egress queue selection, inner DSCP is ignored.
+        # Ref: ADO #37561457
+        if dscp_mode == 'pipe' and duthost.facts.get('hwsku', '').startswith('Arista-7060CX'):
+            pytest.skip('Broadcom TH (Tomahawk 1) does not support IPIP pipe mode -- '
+                        'hardware always uses outer DSCP for egress queue selection')
+
         with allure.step("Prepare test parameter"):
             test_params = self._setup_test_params(duthost, tbinfo, downstream_links, upstream_links)
 
