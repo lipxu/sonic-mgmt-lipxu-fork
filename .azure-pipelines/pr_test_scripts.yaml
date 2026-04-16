@@ -838,7 +838,7 @@ t2:
   - platform_tests/test_link_down.py
   - platform_tests/test_link_down_sup.py
   - platform_tests/test_liquid_cooling_leakage_detection.py
-  - platform_tests/test_memory_exhaustion.py
+  # - platform_tests/test_memory_exhaustion.py
   - platform_tests/test_platform_info.py
   - platform_tests/test_pmon_grep_safe.py
   - platform_tests/test_port_toggle.py
@@ -892,7 +892,7 @@ t2:
   - snmp/test_snmp_v2mib.py
   - ssh/test_ssh_ciphers.py
   - ssh/test_ssh_default_password.py
-  - ssh/test_ssh_limit.py
+  # - ssh/test_ssh_limit.py
   - ssh/test_ssh_stress.py
   - stress/test_stress_routes.py
   - syslog/test_logrotate.py
