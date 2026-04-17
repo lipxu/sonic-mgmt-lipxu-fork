@@ -376,7 +376,7 @@ class Test_VxLAN_VNET_PING_TSA():
                 return False
         return True
 
-    def test_tsa_case1(self, setUp, encap_type):
+    def test_tsa_case1(self, setUp, encap_type, setup_vnet_ping_responder):
         '''
             tc1: This test checks the basic TSA removal of vnet-ping sessions.
             1) Create Vnet route with 4 endpoints and vnet-ping monitors.
@@ -408,7 +408,7 @@ class Test_VxLAN_VNET_PING_TSA():
 
         self.delete_vnet_route(encap_type, dest)
 
-    def test_tsa_case2(self, setUp, encap_type):
+    def test_tsa_case2(self, setUp, encap_type, setup_vnet_ping_responder):
         '''
             tc2: This test checks the basic route application while in TSA.
             1) apply TSA.
@@ -439,7 +439,7 @@ class Test_VxLAN_VNET_PING_TSA():
 
         self.delete_vnet_route(encap_type, dest)
 
-    def test_tsa_case3(self, setUp, encap_type):
+    def test_tsa_case3(self, setUp, encap_type, setup_vnet_ping_responder):
         '''
             tc3: This test checks for lasting impact of TSA and TSB.
             1) apply TSA.
@@ -470,7 +470,7 @@ class Test_VxLAN_VNET_PING_TSA():
 
         self.delete_vnet_route(encap_type, dest)
 
-    def test_tsa_case4(self, setUp, encap_type):
+    def test_tsa_case4(self, setUp, encap_type, setup_vnet_ping_responder):
         '''
             tc4: This test checks TSA state retention w.r.t vnet-ping across config reload.
             1) Create Vnet route with 4 endpoints and vnet-ping monitors.
@@ -521,7 +521,7 @@ class Test_VxLAN_VNET_PING_TSA():
 
         self.delete_vnet_route(encap_type, dest)
 
-    def test_tsa_case5(self, setUp, encap_type):
+    def test_tsa_case5(self, setUp, encap_type, setup_vnet_ping_responder):
         '''
             tc5: This test checks that the vnet-ping doesnt come up while device
             is in TSA and remains down across config reload.
