@@ -310,6 +310,18 @@ class TestCOPP(object):
         reboot(duthost, localhost, reboot_type=reboot_type, reboot_helper=None, reboot_kwargs=None)
 
         time.sleep(180)
+
+        # On platforms where Docker state lives in RAM (e.g., Arista 7060CX with docker_inram=on),
+        # the syncd container is recreated on every cold reboot, losing ptf_nn_agent.
+        # Re-install ptf_nn_agent only if it is not already running after the reboot.
+        if not copp_utils.is_ptf_nn_agent_running(duthost, copp_testbed.nn_target_namespace):
+            logger.info("ptf_nn_agent not running after reboot, re-configuring syncd")
+            copp_utils.configure_syncd(duthost, copp_testbed.nn_target_port,
+                                       copp_testbed.nn_target_interface,
+                                       copp_testbed.nn_target_namespace,
+                                       copp_testbed.nn_target_vlanid,
+                                       copp_testbed.swap_syncd, copp_testbed.creds)
+
         logger.info("Verify always_enable of {} == {} in config_db".format(self.trap_id, "true"))
         copp_utils.verify_always_enable_value(duthost, self.trap_id, "true")
 
