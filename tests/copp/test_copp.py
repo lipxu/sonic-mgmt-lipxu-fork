@@ -283,7 +283,7 @@ class TestCOPP(object):
             "uninstalling {} trap fail".format(self.trap_id))
 
     @pytest.mark.disable_loganalyzer
-    def test_trap_config_save_after_reboot(self, duthosts, localhost, enum_rand_one_per_hwsku_frontend_hostname,
+    def test_trap_config_save_after_reboot(self, duthosts, localhost, enum_rand_one_per_hwsku_frontend_hostname, creds,
                                            ptfhost, check_image_version, copp_testbed, dut_type,
                                            backup_restore_config_db, request):   # noqa: F811
         """
@@ -320,7 +320,7 @@ class TestCOPP(object):
                                        copp_testbed.nn_target_interface,
                                        copp_testbed.nn_target_namespace,
                                        copp_testbed.nn_target_vlanid,
-                                       copp_testbed.swap_syncd, copp_testbed.creds)
+                                       copp_testbed.swap_syncd, creds)
 
         logger.info("Verify always_enable of {} == {} in config_db".format(self.trap_id, "true"))
         copp_utils.verify_always_enable_value(duthost, self.trap_id, "true")
