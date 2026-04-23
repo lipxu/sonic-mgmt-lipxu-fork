@@ -2,6 +2,7 @@
   "COMMON": [
     {
       "name": "monit",
+      "order": 100,
       "cmd": "sudo monit status",
       "memory_params": {
         "memory_usage": {
