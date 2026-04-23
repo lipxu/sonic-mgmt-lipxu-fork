@@ -375,6 +375,14 @@ def setup_and_teardown(duthost, vmhost, creds):
 
     yield
 
+    # Ensure the DUT is disjoined so ctrmgrd restores locally-managed container
+    # states (restapi, swss, syncd, etc.) that were disabled during k8s join
+    # preparation. Without this, a failed join leaves containers permanently
+    # disabled for all subsequent tests on the device.
+    # This is idempotent: calling 'disable on' when already disjoined is a no-op.
+    duthost.shell("sudo config kube server disable on", module_ignore_errors=True)
+    time.sleep(5)
+
     # Clean up the k8s table in configdb
     clean_configdb_k8s_table(duthost)
 
