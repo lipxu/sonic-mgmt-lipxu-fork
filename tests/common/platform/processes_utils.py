@@ -35,16 +35,16 @@ def check_pmon_uptime_minutes(duthost, minimal_runtime=6):
 def reset_timeout(duthost):
     """
     return: if timeout is specified in inventory file for this dut, return new timeout
-            if not specified, return 300 sec as default timeout
+            if not specified, return 360 sec as default timeout
     e.g.
         processes_utils.py:
           timeout: 400
           wait: 60
     """
-    reset_timeout = 300
+    reset_timeout = 360
     plt_reboot_ctrl = get_plt_reboot_ctrl(duthost, 'processes_utils.py', 'cold')
     if plt_reboot_ctrl:
-        reset_timeout = plt_reboot_ctrl.get('timeout', 300)
+        reset_timeout = plt_reboot_ctrl.get('timeout', 360)
     return reset_timeout
 
 
