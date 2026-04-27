@@ -1092,6 +1092,12 @@ dhcp_relay/test_dhcpv6_relay.py::test_interface_binding:
     conditions:
       - "release in ['201911', '202106']"
 
+dhcp_relay/.*\[.*sonic-relay-agent:
+  skip:
+    reason: "sonic-relay-agent is not supported on Arista-720DT-G48S4 in 202511"
+    conditions:
+      - "hwsku in ['Arista-720DT-G48S4']"
+
 #######################################
 #####         dhcp_server        #####
 #######################################
