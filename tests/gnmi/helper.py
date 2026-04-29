@@ -100,7 +100,7 @@ def recover_cert_config(duthost):
         if len(res) < 3:
             continue
         program = res[0]
-        if program in ["gnmi-native", "telemetry"]:
+        if program in ["gnmi-native", "telemetry", "rsyslogd", "supervisor-proc-exit-listener"]:
             dut_command = "docker exec %s supervisorctl start %s" % (env.gnmi_container, program)
             duthost.shell(dut_command, module_ignore_errors=True)
 
