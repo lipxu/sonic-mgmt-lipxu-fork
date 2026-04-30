@@ -5496,7 +5496,7 @@
 
 - conf-name: vmsvc-ut2-7280r4-1
   group-name: svc7-1
-  topo: t2_single_node_min_nexthop_ut2
+  topo: t2_single_node_min_first_6ports
   ptf_image_name: docker-ptf
   ptf: svc7-1
   ptf_ip: 10.206.144.83/24
@@ -5511,7 +5511,7 @@
 
 - conf-name: vmsvc-ut2-7280r4-2
   group-name: svc7-2
-  topo: t2_single_node_min_nexthop_ut2
+  topo: t2_single_node_min_first_6ports
   ptf_image_name: docker-ptf
   ptf: svc7-2
   ptf_ip: 10.206.144.84/24
