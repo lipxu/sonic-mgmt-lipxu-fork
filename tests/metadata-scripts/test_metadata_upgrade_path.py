@@ -1,6 +1,7 @@
 import pytest
 import logging
-from utilities import boot_into_base_image, boot_into_base_image_t2, cleanup_prev_images, sonic_update_firmware
+from utilities import boot_into_base_image, boot_into_base_image_t2, cleanup_prev_images, \
+    sonic_update_firmware, workaround_ensure_all_portchannels_have_ips
 from postupgrade_helper import run_postupgrade_actions, run_bgp_neighbor
 from tests.common.helpers.dut_utils import patch_rsyslog
 from tests.common.reboot import REBOOT_TYPE_COLD
@@ -117,6 +118,9 @@ def setup_upgrade_test(duthost, localhost, from_image, to_image,
     if allow_fail and modify_reboot_script:
         # add fail step to reboot script
         modify_reboot_script(upgrade_type)
+
+    # NOTE: Workaround a known colboot issue in 202505 coldboot
+    workaround_ensure_all_portchannels_have_ips(duthost)
 
 
 def test_cancelled_upgrade_path(localhost, duthosts, rand_one_dut_hostname, ptfhost,

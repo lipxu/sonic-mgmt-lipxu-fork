@@ -11,7 +11,8 @@ from tests.common.helpers.upgrade_helpers import install_sonic, check_sonic_vers
     upgrade_test_helper
 from tests.common.helpers.upgrade_helpers import restore_image            # noqa: F401
 from tests.common.helpers.multi_thread_utils import SafeThreadPoolExecutor
-from tests.upgrade_path.utilities import cleanup_prev_images, boot_into_base_image, boot_into_base_image_t2
+from tests.upgrade_path.utilities import cleanup_prev_images, boot_into_base_image, boot_into_base_image_t2, \
+    workaround_ensure_all_portchannels_have_ips
 from tests.common.fixtures.advanced_reboot import get_advanced_reboot   # noqa: F401
 from tests.common.fixtures.consistency_checker.consistency_checker import consistency_checker_provider  # noqa: F401
 from tests.common.platform.device_utils import verify_dut_health, verify_testbed_health    # noqa: F401
@@ -69,6 +70,9 @@ def setup_upgrade_test(duthost, localhost, from_image, to_image, tbinfo,
     if allow_fail and modify_reboot_script:
         # add fail step to reboot script
         modify_reboot_script(upgrade_type)
+
+    # NOTE: Workaround a known colboot issue in 202505 coldboot
+    workaround_ensure_all_portchannels_have_ips(duthost)
 
 
 @pytest.mark.device_type('vs')
