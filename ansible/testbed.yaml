@@ -5658,7 +5658,7 @@
 
 - conf-name: vmstr-ut2-7280r4-1
   group-name:
-  topo: t2_single_node_min_nexthop_ut2
+  topo: t2_single_node_min_first_6ports
   ptf_image_name: docker-ptf
   ptf:
   ptf_ip:
@@ -5673,7 +5673,7 @@
 
 - conf-name: vmstr-ut2-7280r4-2
   group-name:
-  topo: t2_single_node_min_nexthop_ut2
+  topo: t2_single_node_min_first_6ports
   ptf_image_name: docker-ptf
   ptf:
   ptf_ip:
@@ -5688,7 +5688,7 @@
 
 - conf-name: vmstr-ut2-7280r4-3
   group-name:
-  topo: t2_single_node_min_nexthop_ut2
+  topo: t2_single_node_min_first_6ports
   ptf_image_name: docker-ptf
   ptf:
   ptf_ip:
@@ -5703,7 +5703,7 @@
 
 - conf-name: vmstr-ut2-7280r4-4
   group-name:
-  topo: t2_single_node_min_nexthop_ut2
+  topo: t2_single_node_min_first_6ports
   ptf_image_name: docker-ptf
   ptf:
   ptf_ip:
