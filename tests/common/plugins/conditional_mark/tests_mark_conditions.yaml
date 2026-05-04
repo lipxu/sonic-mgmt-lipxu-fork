@@ -523,9 +523,12 @@ bgp/test_bgp_update_replication.py:
 
 bgp/test_bgp_vnet.py:
   skip:
-    reason: "Test is only enabled for VS, Cisco and Nvidia mellanox platforms"
+    reason: "Test is only enabled for VS, Cisco and Nvidia mellanox platforms on t0-28 and t0-32 topologies. Doesn't support in internal branch due to template difference"
+    conditions_logical_operator: or
     conditions:
       - "asic_type not in ['vs', 'cisco-8000', 'mellanox']"
+      - "'internal' in branch"
+      - "(topo_name not in ['t0-28', 't0-32'])"
 
 bgp/test_bgpmon.py:
   skip:
