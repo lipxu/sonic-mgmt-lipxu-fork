@@ -876,7 +876,7 @@ sonic_arista_7280r4_400G:
       serial: SSN25462008
       base_mac: b8:a1:b8:a4:37:a2
       ansible_host: 10.3.152.115
-      ansible_hostv6:
+      ansible_hostv6: 2a01:111:e210:86::b3
       model: 'DCS-7280R4K-32QF-32DF'
       syseeprom_info:
         "0x21": "DCS-7280R4K-32QF-32DF"
@@ -899,7 +899,7 @@ sonic_arista_7280r4_400G:
       serial: SSN25462010
       base_mac: b8:a1:b8:a4:39:23
       ansible_host: 10.3.152.116
-      ansible_hostv6:
+      ansible_hostv6: 2a01:111:e210:86::b4
       model: 'DCS-7280R4K-32QF-32DF'
       syseeprom_info:
         "0x21": "DCS-7280R4K-32QF-32DF"
