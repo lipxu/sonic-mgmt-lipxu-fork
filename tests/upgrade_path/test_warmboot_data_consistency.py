@@ -10,6 +10,8 @@ from tests.common.db_comparison import SonicRedisDBSnapshotter, DBType
 from tests.common import reboot
 from tests.common.helpers.upgrade_helpers import install_sonic, restore_image  # noqa F401
 from tests.common.platform.device_utils import get_current_sonic_version, verify_dut_health  # noqa F401
+from tests.common.utilities import wait_until
+from tests.common.helpers.assertions import pytest_assert
 
 pytestmark = [
     pytest.mark.topology('t0'),
@@ -19,6 +21,20 @@ pytestmark = [
     pytest.mark.skip_check_dut_health
 ]
 logger = logging.getLogger(__name__)
+
+def _all_bgp_sessions_established(duthost):
+    try:
+        bgp_facts_list = duthost.bgp_facts(asic_index='all')
+    except Exception:
+        return False
+    for asic_facts in bgp_facts_list:
+        neighbors = asic_facts.get('ansible_facts', {}).get('bgp_neighbors', {})
+        if not neighbors:
+            return False
+        if any(v['state'] != 'established' for v in neighbors.values()):
+            return False
+    return True
+
 
 
 def _resolve_test_params(request):
@@ -96,8 +112,18 @@ def test_warmboot_data_consistency(localhost, duthosts, rand_one_dut_hostname, t
     logger.info(f"Target image {to_image} installed on {duthost.hostname}")
     backup_device_logs(duthost, "logs/base_image_device_logs")
 
+    # install_sonic() cold-reboots the DUT into the new image. The warm-reboot RESTARTCHECK
+    # probes PortChannel peers via BGP; if invoked too soon (before BGP converges), rc=10.
+    # Wait up to 300s for all BGP sessions to establish before starting the warm-reboot.
+    logger.info('Waiting for all BGP sessions to establish after install_sonic cold reboot ...')
+    pytest_assert(
+        wait_until(300, 10, 0, _all_bgp_sessions_established, duthost),
+        'BGP sessions did not establish within 300s after install_sonic on {}'.format(duthost.hostname)
+    )
+    logger.info('All BGP sessions established on %s, proceeding with warm-reboot', duthost.hostname)
+
     # Warm upgrade to target image
-    reboot(duthost, localhost, reboot_type="warm", wait_warmboot_finalizer=True, safe_reboot=True)
+    reboot(duthost, localhost, reboot_type='warm', wait_warmboot_finalizer=True, safe_reboot=True)
 
     # Now all data needed for the upgrade path summary has been collected, write it out
     upgrade_summary_path = os.path.join("logs", "test_upgrade_path_summary.json")
