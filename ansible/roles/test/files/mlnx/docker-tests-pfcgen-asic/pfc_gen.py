@@ -100,9 +100,10 @@ def set_port_pg_lossless(handle, log_port, pg, enable):
 
     rc = sx_api_cos_port_buff_type_set(handle, SX_ACCESS_CMD_SET, log_port, port_buffer_attr_list_p, 1)  # noqa: F405
     if rc != SX_STATUS_SUCCESS:  # noqa: F405
-        sys.exit(rc)
-        on_sdk_error(("sx_api_cos_port_buff_type_set [cmd=%d, log_port=0x%x , cnt=%d, rc=%d] " %
-                      (SX_ACCESS_CMD_SET, log_port, 1, rc)))  # noqa: F405
+        print("sx_api_cos_port_buff_type_set [cmd=%d, log_port=0x%x, cnt=%d, rc=%d] failed, "
+              "skipping lossless PG setup for this port" %
+              (SX_ACCESS_CMD_SET, log_port, 1, rc))  # noqa: F405
+        return
 
 
 def build_port_name_dict():
