@@ -3661,6 +3661,7 @@ def setup_pfc_test(
     config_facts = duthost.config_facts(host=duthost.hostname, source="running")['ansible_facts']
     dut_eth0_ip = duthost.mgmt_ip
     vlan_nw = None
+    vlan_nw_list = None
 
     if mg_facts['minigraph_vlans']:
         # Filter VLANs with one interface inside only(PortChannel interface in case of t0-56-po2vlan topo)
@@ -3693,10 +3694,24 @@ def setup_pfc_test(
         vlan_addr = vlan_iface['addr']
         vlan_prefix = vlan_iface['prefixlen']
         vlan_dev = vlan_iface['attachto']
+        # Generate one unique neighbor IP per VLAN member so each VLAN port has a
+        # distinct test_neighbor_addr. This is required for PFCWD all-port-storm and
+        # similar tests where PTF background traffic must reach every VLAN port; if all
+        # VLAN ports share a single neighbor IP, the DUT routes all background traffic
+        # out a single port (whichever wins the ND lookup) and the other VLAN ports
+        # never see queued egress traffic on the test queue, preventing PFCWD detection.
+        num_vlan_members = sum(
+            len([m for m in v.get('members', []) if 'PortChannel' not in m])
+            for v in mg_facts['minigraph_vlans'].values()
+        )
+        ip_count = max(1, num_vlan_members)
         vlan_ips = duthost.get_ip_in_range(
-            num=1, prefix="{}/{}".format(vlan_addr, vlan_prefix),
+            num=ip_count, prefix="{}/{}".format(vlan_addr, vlan_prefix),
             exclude_ips=[vlan_addr])['ansible_facts']['generated_ips']
-        vlan_nw = vlan_ips[0].split('/')[0]
+        # vlan_nw kept for backward compatibility (some callers expect a single IP);
+        # vlan_nw_list carries the full set of unique IPs used by TrafficPorts.
+        vlan_nw_list = [ip.split('/')[0] for ip in vlan_ips]
+        vlan_nw = vlan_nw_list[0]
         logger.debug(
             "setup_pfc_test: ip_version={} vlan_addr={} vlan_prefix={} "
             "vlan_dev={} vlan_ips={} vlan_nw={}".format(
@@ -3712,7 +3727,8 @@ def setup_pfc_test(
     else:
         pytest.fail(f"Invalid IP version: {input}", pytrace=True)
 
-    tp_handle = TrafficPorts(mg_facts, neighbors, vlan_nw, topo, config_facts, ip_version_num)
+    tp_handle = TrafficPorts(mg_facts, neighbors, vlan_nw, topo, config_facts, ip_version_num,
+                             vlan_nw_list=vlan_nw_list if mg_facts['minigraph_vlans'] else None)
     test_ports = tp_handle.build_port_list()
 
     # In T1 topology update test ports by removing inactive ports

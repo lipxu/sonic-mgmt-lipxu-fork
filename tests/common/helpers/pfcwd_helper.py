@@ -36,12 +36,16 @@ logger = logging.getLogger(__name__)
 
 class TrafficPorts(object):
     """ Generate a list of ports needed for the PFC Watchdog test"""
-    def __init__(self, mg_facts, neighbors, vlan_nw, topo, config_facts, ip_version):
+    def __init__(self, mg_facts, neighbors, vlan_nw, topo, config_facts, ip_version,
+                 vlan_nw_list=None):
         """
         Args:
             mg_facts (dict): parsed minigraph info
             neighbors (list):  'device_conn' info from connection graph facts
-            vlan_nw (string): ip in the vlan range specified in the DUT
+            vlan_nw (string): a single IP in the vlan range (legacy / fallback).
+            vlan_nw_list (list, optional): one unique IP per VLAN member. When
+                provided, each VLAN port gets a distinct test_neighbor_addr so that
+                PTF background traffic can reach every VLAN port individually.
 
         """
         self.mg_facts = mg_facts
@@ -51,6 +55,7 @@ class TrafficPorts(object):
         self.vlan_info = self.mg_facts['minigraph_vlans']
         self.neighbors = neighbors
         self.vlan_nw = vlan_nw
+        self.vlan_nw_list = vlan_nw_list
         self.test_ports = dict()
         self.pfc_wd_rx_port = None
         self.pfc_wd_rx_port_addr = None
@@ -234,9 +239,20 @@ class TrafficPorts(object):
         vlan_id = vlan_details['vlanid']
         rx_port = self.pfc_wd_rx_port if isinstance(self.pfc_wd_rx_port, list) else [self.pfc_wd_rx_port]
         rx_port_id = self.pfc_wd_rx_port_id if isinstance(self.pfc_wd_rx_port_id, list) else [self.pfc_wd_rx_port_id]
+        # Build a per-port unique IP mapping when vlan_nw_list is provided. This ensures
+        # each VLAN port has a distinct test_neighbor_addr so PTF background traffic
+        # can be directed to each VLAN port individually (required for PFCWD all-port
+        # storm tests). Falls back to legacy single-IP behaviour when vlan_nw_list is
+        # unavailable (preserves dualtor and other code paths unchanged).
+        per_port_ip = {}
+        if self.vlan_nw_list and 'dualtor' not in self.topo:
+            for i, member in enumerate(vlan_members):
+                per_port_ip[member] = self.vlan_nw_list[i % len(self.vlan_nw_list)]
         for item in vlan_members:
-            ip_addr = self.vlan_nw if 'dualtor' not in self.topo else \
-                      self.config_facts['MUX_CABLE'][item][f'server_ipv{self.ip_version}'].split('/')[0]
+            if 'dualtor' in self.topo:
+                ip_addr = self.config_facts['MUX_CABLE'][item][f'server_ipv{self.ip_version}'].split('/')[0]
+            else:
+                ip_addr = per_port_ip.get(item, self.vlan_nw)
             temp_ports[item] = {'test_neighbor_addr': ip_addr,
                                 'rx_port': rx_port,
                                 'rx_neighbor_addr': self.pfc_wd_rx_neighbor_addr,

@@ -181,23 +181,38 @@ def set_storm_params(duthost, fanout_graph, fanouthosts, peer_params):
 
 def resolve_arp(duthost, ptfhost, test_ports_info, vlan, ip_version):
     """
-    Populate ARP info for the DUT vlan port
+    Populate ARP/ND info for ALL DUT VLAN test ports.
+
+    Each VLAN test port has its own unique test_neighbor_addr (assigned by
+    TrafficPorts in pfcwd_helper.py). For PTF background traffic to actually
+    reach every VLAN port, each PTF interface must be configured with its
+    matching neighbor IP and the DUT must learn ARP/ND for that IP on the
+    correct VLAN port. Iterate ALL VLAN test ports here (previously only the
+    first VLAN port was configured because of a ``break`` after the first
+    iteration, which caused only one VLAN port to ever receive traffic).
 
     Args:
-        ptfhost: ptf host instance
-        test_ports_info: test ports information
+        duthost: DUT host instance
+        ptfhost: PTF host instance
+        test_ports_info: test ports information (mapping of DUT port -> info)
+        vlan: vlan information dict, must contain 'prefix'
+        ip_version: 'IPv4' or 'IPv6'
     """
     for port, port_info in test_ports_info.items():
-        if port_info['test_port_type'] == 'vlan':
-            neighbor_ip = port_info['test_neighbor_addr']
-            ptf_port = f"eth{port_info['test_port_id']}"
-            if ip_version == "IPv4":
-                ptfhost.command(f"ifconfig {ptf_port} {neighbor_ip}")
-                duthost.command(f"docker exec -i swss arping {neighbor_ip} -c 5")
-            else:
-                ptfhost.command(f"ip -6 addr add {neighbor_ip}/{vlan['prefix']} dev {ptf_port}")
-                duthost.command(f"docker exec -i swss ping -6 -c 5 {neighbor_ip}")
-            break
+        if port_info.get('test_port_type') != 'vlan':
+            continue
+        neighbor_ip = port_info['test_neighbor_addr']
+        ptf_port = f"eth{port_info['test_port_id']}"
+        if ip_version == "IPv4":
+            ptfhost.command(f"ifconfig {ptf_port} {neighbor_ip}/{vlan['prefix']}",
+                            module_ignore_errors=True)
+            duthost.command(f"docker exec -i swss arping {neighbor_ip} -c 3 -w 2",
+                            module_ignore_errors=True)
+        else:
+            ptfhost.command(f"ip -6 addr add {neighbor_ip}/{vlan['prefix']} dev {ptf_port}",
+                            module_ignore_errors=True)
+            duthost.command(f"docker exec -i swss ping -6 -c 3 -W 2 {neighbor_ip}",
+                            module_ignore_errors=True)
 
 
 @pytest.mark.usefixtures('degrade_pfcwd_detection', 'stop_pfcwd', 'storm_test_setup_restore', 'start_background_traffic')  # noqa: E501
