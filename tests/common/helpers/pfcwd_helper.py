@@ -1,3 +1,4 @@
+import re
 import datetime
 import ipaddress
 import sys
@@ -12,6 +13,7 @@ from tests.common import constants
 from tests.common import config_reload
 from tests.common.cisco_data import is_cisco_device
 from tests.common.devices.eos import EosHost
+from tests.common.helpers.assertions import pytest_assert
 from tests.common.mellanox_data import is_mellanox_device
 
 # If the version of the Python interpreter is greater or equal to 3, set the unicode variable to the str class.
@@ -32,6 +34,14 @@ PFCWD_DEFAULT_RESTORE_TIME = 200
 PFCWD_DEFAULT_POLL_INTERVAL = 200
 PFCWD_DEFAULT_PORT_NUM = 32
 PFCWD_MAX_POLL_INTERVAL = 1000
+
+# Documentation-only address space (RFC 5737 and RFC 3849) used to give every PortChannel
+# member its own routed neighbor address during the all-port storm test. These prefixes are
+# reserved for documentation and are not used anywhere else in this repository, so they
+# cannot collide with real testbed addressing. Note that 2001:db8:1::/64 must be avoided:
+# it is the PTF management subnet (see ansible/testbed.yaml).
+PFCWD_MEMBER_SUBNET_IPV4 = "192.0.2.0/24"
+PFCWD_MEMBER_SUBNET_IPV6 = "2001:db8:fc00::/64"
 
 logger = logging.getLogger(__name__)
 
@@ -595,6 +605,15 @@ def _prepare_background_traffic_params(duthost, queues, selected_test_ports, tes
         dst_ips.append(selected_test_port_info["test_neighbor_addr"])
         src_ips.append(selected_test_port_info["rx_neighbor_addr"])
 
+    # The DUT picks the egress port by looking up the destination address, so ports that
+    # share one address cannot each get their own flow: the traffic ends up on whichever
+    # port owns the neighbor entry or wins the LAG hash. Report it instead of silently
+    # covering fewer ports than the caller asked for.
+    duplicate_addrs = {addr for addr in dst_ips if dst_ips.count(addr) > 1}
+    if duplicate_addrs:
+        logger.warning("Background traffic covers %d of %d ports: %s are shared by several ports",
+                       len(set(dst_ips)), len(dst_ips), sorted(duplicate_addrs))
+
     router_mac = duthost.get_dut_iface_mac(selected_test_ports[0])
 
     ptf_params = {'router_mac': router_mac,
@@ -744,8 +763,8 @@ def verify_all_ports_pfc_storm_in_expected_state(dut, storm_hndle, expected_stat
 
     # Verify each port
     ports_in_expected_state = 0
-    # Track per-port result so the duplicate-neighbor grouping below can recompute
-    # both the numerator and denominator consistently.
+    # Track the per-port result so the shared-address adjustment below can recompute both
+    # the numerator and the denominator consistently.
     port_results = {}
     for test_port, queue_idx in ports_to_check:
         port_stats = pfcwd_stats_dict.get((test_port, queue_idx))
@@ -773,8 +792,6 @@ def verify_all_ports_pfc_storm_in_expected_state(dut, storm_hndle, expected_stat
             if ("storm" not in current_status) and (current_detect_count == current_restored_count):
                 is_in_expected_state = True
 
-        port_results[test_port] = port_results.get(test_port, False) or is_in_expected_state
-
         if is_in_expected_state:
             ports_in_expected_state += 1
             if expected_state == "storm" and stormed_ports_list is not None and test_port not in stormed_ports_list:
@@ -782,57 +799,43 @@ def verify_all_ports_pfc_storm_in_expected_state(dut, storm_hndle, expected_stat
         else:
             logger.debug(f"Port {test_port}:{queue_idx} not in {expected_state} state")
 
+        port_results[test_port] = port_results.get(test_port, False) or is_in_expected_state
+
     total_ports = len(ports_to_check)
     if total_ports == 0:
         logger.warning("No ports found to verify")
         return False
 
-    # Some port types are assigned a single shared neighbor IP by design, so only one
-    # of the ports sharing that IP can actually receive the routed PTF background
-    # traffic and build the egress queue occupancy that PFCWD needs to declare a storm:
-    #   * VLAN ports - on non-dualtor t0, setup_pfc_test assigns self.vlan_nw to every
-    #     VLAN port and the DUT does a single ND/ARP lookup for it.
-    #   * PortChannel members - parse_pc_list assigns the PortChannel's single BGP peer
-    #     address to every member, so the DUT LAG-hashes the flow onto one member.
-    # Counting each of those ports individually inflates the denominator and causes
-    # false failures even though the fanout is pausing every physical link.
-    #
-    # To keep the numerator and denominator consistent, group ports of those types that
-    # share a test_neighbor_addr and treat each group as one "effective" port (success =
-    # any member reached the expected state). Routed interfaces get a unique neighbor
-    # address each, so they always form single-port groups and are counted individually.
-    # This adjustment only applies to the storm phase.
+    # The DUT selects the egress port from the destination address, so ports that share a
+    # test_neighbor_addr cannot each receive the routed background traffic: it ends up on
+    # whichever port owns the neighbor entry or wins the LAG hash, and the remaining ports
+    # can never build the egress queue occupancy that PFCWD needs. The test setup hands out
+    # one address per port wherever it can, but some topologies cannot be fixed (for
+    # example a PortChannel whose neighbor min-links cannot be relaxed). Report those ports
+    # loudly, and count each group of ports sharing an address as one effective port so the
+    # denominator matches what the traffic can actually reach.
     if expected_state == "storm" and test_ports_info:
-        shared_ip_types = ('vlan', 'portchannel')
-        shared_ip_groups = {}
-        standalone_ports = []
-        seen_ports = set()
+        addr_to_ports = {}
         for port, _queue_idx in ports_to_check:
-            if port in seen_ports:
-                continue
-            seen_ports.add(port)
-            info = test_ports_info.get(port, {}) or {}
-            ip = info.get('test_neighbor_addr')
-            port_type = info.get('test_port_type')
-            if port_type in shared_ip_types and ip:
-                shared_ip_groups.setdefault((port_type, ip), []).append(port)
-            else:
-                standalone_ports.append(port)
-
-        # Only adjust when ports actually share a neighbor IP.
-        if any(len(ports) > 1 for ports in shared_ip_groups.values()):
-            effective_total = len(shared_ip_groups) + len(standalone_ports)
+            addr = (test_ports_info.get(port, {}) or {}).get('test_neighbor_addr')
+            addr_to_ports.setdefault(addr, set()).add(port)
+        shared = {addr: sorted(ports) for addr, ports in addr_to_ports.items()
+                  if addr and len(ports) > 1}
+        if shared:
+            logger.error("These ports share a neighbor address, so only one port per group can "
+                         "be driven into a storm and the rest are not really covered: %s", shared)
+            effective_total = 0
             effective_success = 0
-            for _group_key, ports in shared_ip_groups.items():
-                if any(port_results.get(p, False) for p in ports):
-                    effective_success += 1
-            for port in standalone_ports:
-                if port_results.get(port, False):
-                    effective_success += 1
-            logger.info(
-                "Adjusting for duplicate neighbor IPs: ports_in_expected_state %d->%d, "
-                "total_ports %d->%d",
-                ports_in_expected_state, effective_success, total_ports, effective_total)
+            for addr, ports in addr_to_ports.items():
+                if addr and len(ports) > 1:
+                    effective_total += 1
+                    effective_success += 1 if any(port_results.get(p, False) for p in ports) else 0
+                else:
+                    effective_total += len(ports)
+                    effective_success += sum(1 for p in ports if port_results.get(p, False))
+            logger.info("Adjusting for shared neighbor addresses: ports_in_expected_state %d->%d, "
+                        "total_ports %d->%d", ports_in_expected_state, effective_success,
+                        total_ports, effective_total)
             ports_in_expected_state = effective_success
             total_ports = effective_total
 
@@ -1070,3 +1073,193 @@ def manage_lag_config(duthosts, enum_rand_one_per_hwsku_frontend_hostname, tbinf
         yield vm_host, neigh_port_channel, min_links
     finally:
         restore_original_config(duthost, port, vm_host, neigh_port_channel, min_links, ports)
+
+
+def _get_neighbor_portchannel(mg_facts, nbrhosts, member):
+    """Look up the neighbor port-channel that `member` belongs to.
+
+    Read-only, so that the caller can decide whether a PortChannel is safe to touch
+    before anything is changed.
+
+    Returns:
+        tuple: (vm_host, neigh_port_channel, configured_min_links), where
+            configured_min_links is None when the neighbor has no min-links configured.
+            All three are None when the neighbor is not an EOS host or cannot be found.
+    """
+    vm_neighbors = mg_facts['minigraph_neighbors']
+    if member not in vm_neighbors:
+        return None, None, None
+
+    peer_device = vm_neighbors[member]['name']
+    peer_port = vm_neighbors[member]['port']
+    vm_host = nbrhosts.get(peer_device, {}).get('host')
+    # Only EOS neighbors are supported. A SONiC neighbor derives min-links from its member
+    # count (see ansible/roles/sonicv2/templates/teamd.j2), so removing a member would take
+    # its PortChannel - and the BGP session running on it - down.
+    if not isinstance(vm_host, EosHost):
+        return None, None, None
+
+    neigh_port_channels = vm_host.eos_command(
+        commands=['show port-channel | json'])['stdout'][0]["portChannels"]
+    for po_name, po_config in neigh_port_channels.items():
+        if peer_port not in po_config['activePorts']:
+            continue
+        # Read the configured value rather than the current member count, otherwise a
+        # port-channel configured with min-links 3 out of 4 members would come back with
+        # the stricter min-links 4.
+        running_config = vm_host.eos_command(
+            commands=[f'show running-config interfaces {po_name}'])['stdout'][0]
+        match = re.search(r'port-channel min-links (\d+)', str(running_config))
+        return vm_host, po_name, int(match.group(1)) if match else None
+
+    return None, None, None
+
+
+def new_portchannel_split_state():
+    """Build the empty state container for split_multi_member_portchannels()."""
+    return {'split_ports': [], 'neighbor_min_links': [], 'touched_portchannels': [],
+            'ptf_sysctl_changed': False, 'ip_version': None, 'prefixlen': None}
+
+
+def split_multi_member_portchannels(duthost, ptfhost, tbinfo, nbrhosts, test_ports, ip_version,
+                                    split_state):
+    """Give every PortChannel member port a neighbor address of its own.
+
+    parse_pc_list() assigns the PortChannel's single BGP peer address to all of its
+    members, so the DUT routes the PTF background traffic to that one next hop and the LAG
+    hash picks a single member. The other members receive the PFC pause frames but never
+    build any egress queue occupancy, so they cannot be driven into a PFC storm and the
+    test cannot cover them individually.
+
+    Keep the first member inside the PortChannel - so the PortChannel, its IP and its BGP
+    session stay up - and break the remaining members out into routed interfaces, each with
+    its own /30 (or /126) towards the PTF port facing it. test_ports is updated in place so
+    that the background traffic is addressed per physical port instead of per PortChannel.
+
+    Args:
+        split_state: state container from new_portchannel_split_state(), updated in place
+            as changes are made so that restore_multi_member_portchannels() can revert a
+            partially applied setup.
+    """
+    if duthost.facts['asic_type'] == 'vs':
+        return
+
+    mg_facts = duthost.get_extended_minigraph_facts(tbinfo)
+    if ip_version == "IPv4":
+        pool = ipaddress.ip_network(PFCWD_MEMBER_SUBNET_IPV4)
+        prefixlen = 30
+    else:
+        pool = ipaddress.ip_network(PFCWD_MEMBER_SUBNET_IPV6)
+        prefixlen = 126
+
+    split_state['ip_version'] = ip_version
+    split_state['prefixlen'] = prefixlen
+    subnets = pool.subnets(new_prefix=prefixlen)
+    for pc_name, pc_meta in mg_facts['minigraph_portchannels'].items():
+        members = [member for member in pc_meta.get('members', []) if member in test_ports]
+        if len(members) < 2:
+            continue
+
+        vm_host, neigh_pc, neigh_min_links = _get_neighbor_portchannel(mg_facts, nbrhosts, members[0])
+        if vm_host is None:
+            logger.warning("Leaving %s alone: its neighbor port-channel could not be relaxed, so "
+                           "removing a member would take the PortChannel down", pc_name)
+            continue
+
+        asic = duthost.get_port_asic_instance(members[0])
+        ns = asic.cli_ns_option
+        # The PortChannel is about to be left with a single member, so make sure that
+        # neither side takes it down.
+        split_state['touched_portchannels'].append(pc_name)
+        duthost.shell(f"sonic-db-cli {ns} CONFIG_DB hset 'PORTCHANNEL|{pc_name}' min_links 1")
+        split_state['neighbor_min_links'].append((vm_host, neigh_pc, neigh_min_links))
+        vm_host.eos_config(lines=['port-channel min-links 1'], parents=[f'int {neigh_pc}'])
+
+        for member in members[1:]:
+            subnet = next(subnets, None)
+            pytest_assert(subnet is not None,
+                          "Ran out of addresses in {} for the PortChannel members".format(pool))
+            dut_addr = subnet[1]
+            ptf_addr = subnet[2]
+            port_info = test_ports[member]
+            ptf_port = "eth{}".format(port_info['test_port_id'])
+
+            duthost.shell(f"sudo config portchannel {ns} member del {pc_name} {member}")
+            duthost.shell(f"sudo config interface {ns} ip add {member} {dut_addr}/{prefixlen}")
+            split_state['split_ports'].append({'port': member, 'portchannel': pc_name,
+                                               'ptf_port': ptf_port, 'ptf_addr': str(ptf_addr),
+                                               'swss': asic.get_docker_name('swss'),
+                                               'port_info': port_info,
+                                               'orig_neighbor_addr': port_info['test_neighbor_addr'],
+                                               'orig_port_type': port_info['test_port_type']})
+            if ip_version == "IPv4":
+                ptfhost.command(f"ifconfig {ptf_port} {ptf_addr} netmask {subnet.netmask}")
+            else:
+                ptfhost.command(f"ip -6 addr add {ptf_addr}/{prefixlen} dev {ptf_port}")
+
+            port_info['test_neighbor_addr'] = str(ptf_addr)
+            port_info['test_port_type'] = 'interface'
+            logger.info("Split %s out of %s: DUT %s/%s, PTF %s %s",
+                        member, pc_name, dut_addr, prefixlen, ptf_port, ptf_addr)
+
+    if not split_state['split_ports']:
+        return
+
+    if ip_version == "IPv4":
+        # Set arp_ignore=1 so each PTF interface only responds to ARP for its own IP.
+        # Without this, Linux's weak host model causes all interfaces to respond to ARP
+        # requests for any local IP, polluting the DUT's ARP table.
+        split_state['ptf_sysctl_changed'] = True
+        ptfhost.command("sysctl -w net.ipv4.conf.all.arp_ignore=1")
+        ptfhost.command("sysctl -w net.ipv4.conf.all.arp_announce=2")
+
+    # Resolve the neighbors only after every address is in place, so that each request
+    # gets a single answer.
+    for entry in split_state['split_ports']:
+        if ip_version == "IPv4":
+            duthost.command("docker exec -i {} arping {} -c 3".format(entry['swss'], entry['ptf_addr']))
+        else:
+            duthost.command("docker exec -i {} ping -6 -c 3 {}".format(entry['swss'], entry['ptf_addr']))
+
+
+def restore_multi_member_portchannels(duthost, ptfhost, split_state):
+    """Revert split_multi_member_portchannels(), including a partially applied setup.
+
+    Every DUT edit goes through the CLI and only touches the running CONFIG_DB, so
+    reloading the on-disk config_db restores the PortChannel membership, the member IPs
+    and min_links in one step.
+    """
+    if not (split_state['split_ports'] or split_state['neighbor_min_links'] or
+            split_state['touched_portchannels']):
+        return
+
+    for entry in split_state['split_ports']:
+        # setup_pfc_test is module scoped, so put the addressing back in the dict as well
+        # as on the DUT, otherwise anything running later in this module would work from
+        # addresses the config_reload below has already removed.
+        entry['port_info']['test_neighbor_addr'] = entry['orig_neighbor_addr']
+        entry['port_info']['test_port_type'] = entry['orig_port_type']
+        if split_state['ip_version'] == "IPv4":
+            ptfhost.command("ifconfig {} 0.0.0.0".format(entry['ptf_port']),
+                            module_ignore_errors=True)
+        else:
+            ptfhost.command("ip -6 addr del {}/{} dev {}".format(
+                entry['ptf_addr'], split_state['prefixlen'], entry['ptf_port']),
+                module_ignore_errors=True)
+
+    if split_state['ptf_sysctl_changed']:
+        ptfhost.command("sysctl -w net.ipv4.conf.all.arp_ignore=0", module_ignore_errors=True)
+        ptfhost.command("sysctl -w net.ipv4.conf.all.arp_announce=0", module_ignore_errors=True)
+
+    # The DUT must be reloaded even if putting a neighbor back fails, otherwise the next
+    # test module inherits a PortChannel with its members broken out.
+    try:
+        for vm_host, neigh_pc, neigh_min_links in split_state['neighbor_min_links']:
+            if neigh_min_links is None:
+                vm_host.eos_config(lines=['no port-channel min-links'], parents=[f'int {neigh_pc}'])
+            else:
+                vm_host.eos_config(lines=[f'port-channel min-links {neigh_min_links}'],
+                                   parents=[f'int {neigh_pc}'])
+    finally:
+        config_reload(duthost, config_source='config_db', safe_reload=True,
+                      check_intf_up_ports=True, wait_for_bgp=True)
